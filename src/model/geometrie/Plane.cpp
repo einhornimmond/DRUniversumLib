@@ -5,8 +5,8 @@ namespace UniLib {
 	namespace model {
 		namespace geometrie {
 
-			Plane::Plane(BaseGeometrieContainer* geometrieContainer)
-				: BaseGeometrie(geometrieContainer)
+			Plane::Plane(BaseGeometrieContainer* baseGeometrieContainer)
+				: BaseGeometrie(baseGeometrieContainer)
 			{
 			}
 			

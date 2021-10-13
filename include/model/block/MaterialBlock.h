@@ -36,6 +36,7 @@
  */
 
 namespace UniLib {
+	
 	namespace model {
 		namespace block {
 
@@ -45,8 +46,11 @@ namespace UniLib {
 				MaterialBlock(std::string name);
 				virtual ~MaterialBlock();
 
+				DRReturn initFromJson(const Json::Value& jsonFileName);
+
 				virtual const char* getResourceType() const {return "MaterialBlock";}
 			protected:
+				
 
 			};
 		}

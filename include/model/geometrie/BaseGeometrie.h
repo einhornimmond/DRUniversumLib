@@ -45,7 +45,7 @@ namespace UniLib {
 			class UNIVERSUM_LIB_API BaseGeometrie
 			{
 			public:
-				BaseGeometrie(BaseGeometrieContainer* container);
+				BaseGeometrie(BaseGeometrieContainer* geometrieContainer);
 				virtual ~BaseGeometrie();
 
 				virtual void generateVertices(GeometrieDataType type) = 0;
