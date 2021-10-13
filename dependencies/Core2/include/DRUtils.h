@@ -58,7 +58,7 @@ CORE2_API int DRCountNumbers(DRString* sInput);
 CORE2_API bool DRisNumber(char cZeichen);
 
 //Entfernt HTML Tags
-CORE2_API DRReturn DRRemoveHTMLTags(char* pcIn, char* pcOut, u32 dwOutLength);
+CORE2_API DRReturn DRRemoveHTMLTags(char* pcIn, char* pcOut, size_t dwOutLength);
 
 //Entfernen einer Pfadangabe aus einem Dateinamen
 CORE2_API const char* DRRemoveDir(const char* pcFilename);

@@ -3,7 +3,7 @@
 DRVector3 DRCubicSpline::getPoint(float fTime)
 {
 	if(fTime < 0.0f) fTime *= -1.0f;
-	if(fTime > 1.0f) fTime = fabs(fTime -(float)(int)fTime);
+	if(fTime > 1.0f) fTime = static_cast<float>(fabs(fTime -(float)(int)fTime));
 	DRReal vecto[] = {fTime*fTime*fTime, fTime*fTime};
 	DRReal erg[4];
 	erg[0] = 2.0f*vecto[0]-3.0f*vecto[1]+1.0f;
@@ -43,7 +43,7 @@ DRVector3 DRCubicSpline::getPoint(float fTime, int rekursion)
 DRReturn DRRNS::addNode(DRVector3 _position)
 {
 	mBuildSplineCalled = false;
-	int size = mNodes.size()-1;
+	size_t size = mNodes.size()-1;
 	mNodes.push_back(Node(_position));
 #ifdef _DEBUG
 	if(size +1 == mNodes.size())
@@ -70,7 +70,7 @@ DRReturn DRRNS::addNode(DRVector3 _position)
 //*****************************************************************************************************************
 void DRRNS::buildSpline()
 {
-	int nodeCount = mNodes.size();
+	size_t nodeCount = mNodes.size();
 	if(nodeCount == 0) return;
 	for(int i = 1; i < nodeCount-1; i++)
 	{
@@ -87,13 +87,13 @@ void DRRNS::buildSpline()
 	mBuildSplineCalled = true;
 }
 //-----------------------------------------------------------------------------------------------------------------
-DRVector3 DRRNS::getStartVelocity(int index)
+DRVector3 DRRNS::getStartVelocity(size_t index)
 {
 	DRVector3 temp = 3.0f * (mNodes[index+1].position - mNodes[index].position)/mNodes[index].distance;
 	return (temp - mNodes[index+1].velocity)*0.5f;
 }
 //-----------------------------------------------------------------------------------------------------------------
-DRVector3 DRRNS::getEndVelocity(int index)
+DRVector3 DRRNS::getEndVelocity(size_t index)
 {
 	DRVector3 temp = 3.f*(mNodes[index].position - mNodes[index-1].position)/mNodes[index-1].distance;
 	return (temp - mNodes[index-1].velocity)*0.5f;
@@ -102,7 +102,7 @@ DRVector3 DRRNS::getEndVelocity(int index)
 DRVector3 DRRNS::getPoint(float fTime, int rekursion)
 {
 	if(fTime < 0.0f) fTime *= -1.0f;
-	if(fTime > 1.0f) fTime = fabs(fTime -(float)(int)fTime);
+	if(fTime > 1.0f) fTime = static_cast<float>(fabs(fTime -(float)(int)fTime));
 
 	if(!mBuildSplineCalled) buildSpline();
 	if(mNodes.size() == 0) return DRVector3(0.0f);

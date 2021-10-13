@@ -29,9 +29,9 @@ public:
 
 private:
 	// internal. Based on Equation 14 
-	DRVector3 getStartVelocity(int index);
+	DRVector3 getStartVelocity(size_t index);
 	// internal. Based on Equation 15 
-	DRVector3 getEndVelocity(int index);
+	DRVector3 getEndVelocity(size_t index);
 	struct Node
 	{
 		explicit Node(DRVector3 _position)

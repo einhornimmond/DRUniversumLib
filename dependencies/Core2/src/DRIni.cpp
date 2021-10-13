@@ -1,3 +1,4 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include "Core2Main.h"
 
 using namespace std;
@@ -6,7 +7,13 @@ DRIni::DRIni(const char* fileName)
 : mFilePointer(NULL),
 mValid(false)
 {
-    mFilePointer  = fopen(fileName, "rt");
+#ifdef _WIN32
+	auto result = fopen_s(&mFilePointer, fileName, "rt");
+	if (result) mFilePointer = nullptr;
+#else 
+	mFilePointer = fopen(fileName, "rt");
+#endif
+    
     char c;
     if(!mFilePointer)
     {
