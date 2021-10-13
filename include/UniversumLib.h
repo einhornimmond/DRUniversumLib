@@ -41,24 +41,44 @@
 
 #ifdef _WIN32
 #include <windows.h>
+#include "Winbase.h"
 #else
 #include <dlfcn.h>
 #endif //_WIN32
 
-
+#define LOG_SDL_INTERN(text, f, l, fu) DRLog.writeToLog("<tr><td><font size=\"2\"><b><font color=\"#BF8000\">SDL Fehler:</font></b> %s</font></td><td><font size=\"2\"> (<i>%s</i>, Zeile <i>%d</i>, Funktion <i>%s</i>)</font></td></tr>", text, f, l, fu)
+#define LOG_ERROR_SDL(r) {const char* pcErrorSDL = SDL_GetError(); if(strlen(pcErrorSDL) > 2){ LOG_SDL_INTERN(pcErrorSDL, DRRemoveDir(__FILE__), __LINE__, __FUNCTION__); return r;}}
+#define LOG_ERROR_SDL_VOID() {const char* pcErrorSDL = SDL_GetError(); if(strlen(pcErrorSDL) > 2){ LOG_SDL_INTERN(pcErrorSDL, DRRemoveDir(__FILE__), __LINE__, __FUNCTION__); return;}}
+#define LOG_WARNING_SDL() {const char* pcErrorSDL = SDL_GetError(); if(strlen(pcErrorSDL) > 2) LOG_SDL_INTERN(pcErrorSDL, DRRemoveDir(__FILE__), __LINE__, __FUNCTION__);}
 
 #include "Core2/Core2Main.h"
 #include "sdl/SDL.h"
+#include "lib/Timer.h"
+#include "lib/Thread.h"
+#include "lib/MultithreadContainer.h"
+#include <queue>
+#include <type_traits>
+#include "lib/MultithreadQueue.h"
 #include "lib/Logging.h"
 #include "controller/BindToRenderer.h"
 #include "json/json.h"
+#include "rapidjson/document.h"
 
-#include <queue>
 #include <cassert>
+#include <sstream>
 
 namespace UniLib {
     UNIVERSUM_LIB_API extern lib::EngineLogger EngineLog;
-	extern controller::BindToRenderer* g_RenderBinder;
+	UNIVERSUM_LIB_API extern lib::EngineLogger SpeedLog;
+	namespace controller {
+		class BindToRenderer;
+		class CPUSheduler;
+}
+	UNIVERSUM_LIB_API extern controller::BindToRenderer* g_RenderBinder;
+	UNIVERSUM_LIB_API extern controller::CPUSheduler* g_HarddiskScheduler;
+#ifdef _WINDOWS_
+	extern LARGE_INTEGER g_QueryPerformanceFreq;
+#endif // _WINDOWS_
 }
 
 #undef WRITETOLOG
@@ -76,16 +96,30 @@ namespace UniLib {
 #define LOG_WARNING(str) UniLib::EngineLog.LOG_WARNING_INTERN(str);
 //*/
 
-#define LOG_SDL_INTERN(text, f, l, fu) DRLog.writeToLog("<tr><td><font size=\"2\"><b><font color=\"#BF8000\">SDL Fehler:</font></b> %s</font></td><td><font size=\"2\"> (<i>%s</i>, Zeile <i>%d</i>, Funktion <i>%s</i>)</font></td></tr>", text, f, l, fu)
-#define LOG_ERROR_SDL(r) {const char* pcErrorSDL = SDL_GetError(); if(strlen(pcErrorSDL) > 2){ LOG_SDL_INTERN(pcErrorSDL, DRRemoveDir(__FILE__), __LINE__, __FUNCTION__); return r;}}
-#define LOG_ERROR_SDL_VOID() {const char* pcErrorSDL = SDL_GetError(); if(strlen(pcErrorSDL) > 2){ LOG_SDL_INTERN(pcErrorSDL, DRRemoveDir(__FILE__), __LINE__, __FUNCTION__); return;}}
-#define LOG_WARNING_SDL() {const char* pcErrorSDL = SDL_GetError(); if(strlen(pcErrorSDL) > 2) LOG_SDL_INTERN(pcErrorSDL, DRRemoveDir(__FILE__), __LINE__, __FUNCTION__);}
+
 
 
 #ifndef __inline__
 #define  __inline__ inline
 #endif
 
+
+// define OpenGL Types and defines if we haven't openGL
+#ifndef GLenum 
+typedef unsigned int GLenum;
+#endif
+#ifndef GLuint
+typedef unsigned int GLuint;
+#endif
+#ifndef GL_RGBA
+#define GL_RGBA 0x1908
+#endif 
+#ifndef GL_RGB
+#define GL_RGB 0x1907
+#endif
+#ifndef GL_COLOR_INDEX
+#define GL_COLOR_INDEX 0x1900
+#endif
 
 
 // engine functions
@@ -95,15 +129,43 @@ namespace UniLib {
 		NODE_NONE = 0,
 		NODE = 1,
 		MOVEABLE_NODE = 2,
-		VISIBLE_NODE = 4
+		VISIBLE_NODE = 4,
+		SEKTOR_NODE = 8,
+		BLOCK_SEKTOR_NODE = 16,
+		OCTREE_NODE = 32,
+		BLOCK_SECTOR_TREE_NODE = 64
 	};
 
-    UNIVERSUM_LIB_API DRReturn init();
+	enum LoadingState {
+		// empty structure
+		LOADING_STATE_EMPTY = 0,
+		// has every information needed to load
+		LOADING_STATE_HAS_INFORMATIONS = 1,
+		// work on loading resources
+		LOADING_STATE_PARTLY_LOADED = 2,
+		// fully loaded and ready for using
+		LOADING_STATE_FULLY_LOADED = 4
+	};
+
+	enum UNIVERSUM_LIB_API GPUTaskSpeed {
+		GPU_TASK_FAST = 0,
+		GPU_TASK_SLOW = 1,
+		GPU_TASK_LOAD = 2,
+		GPU_TASK_ENTRY_COUNT = 3
+	};
+
+	UNIVERSUM_LIB_API const char* getGpuTaskSpeedName(GPUTaskSpeed speed);
+
+	//! \brief 
+	//! \param numberParallelStorageOperations count of storage operations (read and write) at the same time
+	//!        1 recommended by mechanical hard disks, else more possible    
+    UNIVERSUM_LIB_API DRReturn init(int numberParallelStorageOperations = 1);
     UNIVERSUM_LIB_API void exit();
 
     UNIVERSUM_LIB_API DRString getTimeSinceStart();
 	UNIVERSUM_LIB_API std::string readFileAsString(std::string filename);
 	UNIVERSUM_LIB_API Json::Value convertStringToJson(std::string jsonString);
+	UNIVERSUM_LIB_API rapidjson::Document convertStringToRapidJson(std::string jsonString);
     UNIVERSUM_LIB_API DRString getValueAsBinaryString(u8 zahl);
 	UNIVERSUM_LIB_API DRString getValueAsBinaryString(int zahl);
 

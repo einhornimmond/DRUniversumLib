@@ -39,18 +39,21 @@ namespace UniLib {
 		class UNIVERSUM_LIB_API GPUTask : public Task 
 		{
 		public: 
-			GPUTask(bool slowGPUTask = false);
-			GPUTask(size_t childCount, bool slowGPUTask = false);
+			GPUTask(GPUTaskSpeed taskSpeed = GPU_TASK_FAST);
+			GPUTask(size_t childCount, GPUTaskSpeed taskSpeed = GPU_TASK_FAST);
 			virtual ~GPUTask();
 
 			virtual bool const isGPUTask() const {return true;}
 			virtual const char* getResourceType() const {return "GPUTask";};
 
-			virtual bool isSlowGPUTask() {return mSlowTask;}
-		protected:
+			virtual bool isSlowGPUTask() { return mTaskSpeed == GPU_TASK_SLOW; }
+			virtual bool isFastGPUTask() { return mTaskSpeed == GPU_TASK_FAST; }
+			virtual bool isLoadGPUTask() { return mTaskSpeed == GPU_TASK_LOAD; }
 			virtual void scheduleTask(TaskPtr own);
+		protected:
+			
 
-			bool mSlowTask;
+			GPUTaskSpeed mTaskSpeed;
 			
 		};
 

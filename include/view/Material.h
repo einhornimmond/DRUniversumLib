@@ -34,6 +34,9 @@ namespace UniLib {
 	}
 	namespace view {
 
+		class Texture;
+		typedef DRResourcePtr<Texture> TexturePtr;
+
 		class UNIVERSUM_LIB_API Material : public DRIResource
 		{
 		public:
@@ -41,15 +44,22 @@ namespace UniLib {
 			virtual ~Material();
 
 			virtual void bind() = 0;
-			__inline__ void setShaderProgram(model::ShaderProgramPtr shaderProgram) {mShaderProgram = shaderProgram;}
+			__inline__ void setShaderProgram(model::ShaderProgramPtr shaderProgram) { mShaderProgram = shaderProgram; }
 			__inline__ model::ShaderProgramPtr getShaderProgram() {return mShaderProgram;}
 
 			virtual const char* getResourceType() const {return "Material";}
 			virtual bool less_than(DRIResource& b) const {return this < &b;}
+			virtual bool hasTexture() { return false; }
+			virtual bool hasMultiTexture() { return false; }
 
 			__inline__ void setUniformSet(model::UniformSet* uniforms) {mUniformsSet = uniforms;}
-			__inline__ model::UniformSet* const getUniformSet() {return mUniformsSet;}
+			__inline__ model::UniformSet* const getUniformSet() const {return mUniformsSet;}
+
+			// check loading state
+			virtual LoadingState checkLoadingState();
+
 		protected:
+
 			model::ShaderProgramPtr mShaderProgram;
 			model::UniformSet* mUniformsSet;
 		};

@@ -50,11 +50,17 @@ namespace UniLib {
 			__inline__ void setPosition(const DRVector3& pos) {mPosition = pos;}
 			__inline__ const DRVector3& getPosition() const {return mPosition;}
 			__inline__ void move(const DRVector3& diff) {mPositionAdd += diff;}
+			__inline__ void moveAbs(const DRVector3& diff) { mPosition += diff; }
 
 			__inline__ void setScale(const DRVector3& scale) {mScale = scale;}
 			__inline__ const DRVector3& getScale() const {return mScale;}
 
-			DRMatrix calculateMatrix(const DRMatrix& mat);
+			__inline__ const DRVector3& getPositionAdd() const { return mPositionAdd; }
+			__inline__ void setPositionAdd(const DRVector3& positionAdd) { mPositionAdd = positionAdd; }
+
+			//! \brief calculate matrix from position
+			//! \param mat if object has also rotation, give mat to add position changes relative
+			DRMatrix calculateMatrix(const DRMatrix& mat = DRMatrix::identity());
 
 		protected:
 			DRVector3 mPosition;

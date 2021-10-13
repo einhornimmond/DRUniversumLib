@@ -1,26 +1,32 @@
-#include "lib/Thread.h"
+//#include "lib/Thread.h"
+#include "UniversumLib.h"
 
 namespace UniLib {
     namespace lib {
 
-        Thread::Thread(const char* threadName/* = NULL*/)
+        Thread::Thread(const char* threadName/* = NULL*/, bool createInConstructor/* = true*/)
             : mutex(NULL), thread(NULL), condition(NULL), semaphore(NULL), exitCalled(false)
         {
-            semaphore = SDL_CreateSemaphore(1);
-            if(!semaphore) LOG_WARNING_SDL();
-            condition = SDL_CreateCond(); 
-            if(!condition) LOG_WARNING_SDL();
-            if(SDL_SemWait(semaphore)) LOG_WARNING_SDL();
-            mutex = SDL_CreateMutex(); 
-            if(!mutex) LOG_WARNING_SDL();  
+			if (createInConstructor) init(threadName);
+        } 
+
+		DRReturn Thread::init(const char* threadName)
+		{
+			semaphore = SDL_CreateSemaphore(1);
+			if (!semaphore) LOG_WARNING_SDL();
+			condition = SDL_CreateCond();
+			if (!condition) LOG_WARNING_SDL();
+			if (SDL_SemWait(semaphore)) LOG_WARNING_SDL();
+			mutex = SDL_CreateMutex();
+			if (!mutex) LOG_WARNING_SDL();
 
 #if SDL_VERSION_ATLEAST(1,3,0)
-            thread = SDL_CreateThread(run, threadName, this);
+			thread = SDL_CreateThread(run, threadName, this);
 #else
-            thread = SDL_CreateThread(run, this);
+			thread = SDL_CreateThread(run, this);
 #endif
-
-        } 
+			return DR_OK;
+		}
 
         Thread::~Thread()
         {
@@ -30,7 +36,7 @@ namespace UniLib {
                 exitCalled = true;
                 if(SDL_SemPost(semaphore)) LOG_WARNING_SDL();
                 condSignal();
-                SDL_Delay(500);
+                //SDL_Delay(500);
                 SDL_WaitThread(thread, NULL);
                 //LOG_WARNING_SDL();
 
@@ -58,13 +64,13 @@ namespace UniLib {
             {
                 if(t->exitCalled) return 0;
                 // Lock work mutex
-                t->lock();
+                t->threadLock();
                 int status = SDL_CondWait(t->condition, t->mutex); 
                 if(t->exitCalled) return 0;
                 if( status == 0)
                 {
                     int ret = t->ThreadFunction();
-                    t->unlock();
+                    t->threadUnlock();
                     if(ret)
                     {
                         EngineLog.writeToLog("error-code: %d", ret);
@@ -74,7 +80,7 @@ namespace UniLib {
                 else
                 {
                     //unlock mutex and exit
-                    t->unlock();
+                    t->threadUnlock();
                     LOG_ERROR("Fehler in Thread, exit", -1);
                 }
             }
@@ -84,18 +90,15 @@ namespace UniLib {
 		// ---------------------------------------------------------------------------------
 		// Timing thread
 		TimingThread::TimingThread(std::string name, Uint32 rerunDelay, Timer* timerOnWhichToAttach, const char* threadName/* = NULL*/)
-			: Thread(threadName), mTimer(timerOnWhichToAttach), mName(name)
+			: Thread(threadName), mName(name), mTimer(timerOnWhichToAttach), myself(this)
 		{
 			if(timerOnWhichToAttach) {
-				timerOnWhichToAttach->addTimer(name, DRResourcePtr<TimerCallback>(this), rerunDelay);
+				timerOnWhichToAttach->addTimer(name, myself, rerunDelay);
 			}
 		}
 		TimingThread::~TimingThread()
 		{
-			if(mTimer)
-			{
-				mTimer->removeTimer(mName);
-			}
+
 		}
 
 		TimerReturn TimingThread::callFromTimer()

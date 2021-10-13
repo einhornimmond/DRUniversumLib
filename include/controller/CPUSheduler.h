@@ -33,7 +33,6 @@
 #define __DR_UNIVERSUM_LIB_CONTROLLER_CPU_SHEDULER_H__
 
 #include "UniversumLib.h"
-#include "lib/MultithreadQueue.h"
 
 namespace UniLib {
     namespace controller {
@@ -52,6 +51,7 @@ namespace UniLib {
             virtual ~CPUSheduler();
 			
 			DRReturn sheduleTask(TaskPtr task); 
+			void checkPendingTasks();
 #ifdef _UNI_LIB_DEBUG
 			CPUShedulerThread** getThreads(u8& count) {count = mThreadCount; return mThreads;};
 #endif
@@ -59,6 +59,8 @@ namespace UniLib {
 			// return null if no task pending, putting thread in wait queue,
 			// to inform him if a new task is ready for him
 			TaskPtr getNextUndoneTask(CPUShedulerThread* Me);
+
+			__inline__ u8 getThreadCount() { return mThreadCount; }
         protected:
 			
 			
@@ -70,7 +72,9 @@ namespace UniLib {
 			// free worker
 			lib::MultithreadQueue<CPUShedulerThread*> mFreeWorkerThreads;
 			// work to do
-			lib::MultithreadQueue<TaskPtr> mPendingTasks;
+			//lib::MultithreadQueue<TaskPtr> mPendingTasks;
+			std::list<TaskPtr> mPendingTasks;
+			lib::MultithreadContainer mPendingTasksMutex;
 
         };
     }

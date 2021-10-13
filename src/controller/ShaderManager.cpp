@@ -6,6 +6,7 @@ namespace UniLib {
 	namespace controller {
 	using namespace model;
 
+	
 
 		ShaderManager::ShaderManager()
 			: mInitalized(false)
@@ -41,58 +42,70 @@ namespace UniLib {
 			LOG_INFO("ShaderManager beendet");
 		}
 
-		DHASH ShaderManager::makeShaderHash(const char* vertexShader, const char* fragmentShader)
+		DHASH ShaderManager::makeShaderHash(const char* shaderProgramName)
 		{
-			DHASH hash = DRMakeFilenameHash(fragmentShader);
-			hash |= DRMakeFilenameHash(vertexShader)<<8;
+			DHASH hash = DRMakeStringHash(shaderProgramName);
 #ifdef _UNI_LIB_DEBUG
-			std::map<DHASH, ShaderProgramParameter>::iterator it = mHashCollisionCheckMap.find(hash);
+			std::map<DHASH, DRString>::iterator it = mHashCollisionCheckMap.find(hash);
 			if(it != mHashCollisionCheckMap.end()) {
-				if(std::string(vertexShader) != it->second.vertexShaderName || std::string(fragmentShader) != it->second.fragmentShaderName) {
+				if(std::string(shaderProgramName) != it->second) {
 					throw "Shader Hash collision";
 				}
 			} else {
-				mHashCollisionCheckMap.insert(HASH_SHADER_ENTRY(hash, ShaderProgramParameter(vertexShader, fragmentShader)));
+				mHashCollisionCheckMap.insert(HASH_SHADER_ENTRY(hash, DRString(shaderProgramName)));
 			}
 #endif
 			return hash;
 		}
 
-		ShaderProgramPtr ShaderManager::getShaderProgram(ShaderProgramParameter* shaderParameter)
+		model::ShaderProgramPtr ShaderManager::getShaderProgram(const char* shaderProgramName)
 		{
-			return getShaderProgram(shaderParameter->vertexShaderName.data(), shaderParameter->fragmentShaderName.data());
+			DHASH id = makeShaderHash(shaderProgramName);
+			return model::ShaderProgramPtr(getShaderProgram(id));
 		}
 
-		//! lädt oder return instance auf Textur
-		ShaderProgramPtr ShaderManager::getShaderProgram(const char* vertexShader, const char* fragmentShader)
+		model::ShaderProgramPtr ShaderManager::getShaderProgram(DHASH id)
+		{
+			lock();
+			if(mShaderProgramEntrys.find(id) != mShaderProgramEntrys.end())
+			{
+				unlock();
+				return mShaderProgramEntrys[id];
+			}
+			unlock();
+			return NULL;
+		}
+			
+		//!
+		ShaderProgramPtr ShaderManager::getShaderProgram(const char* shaderProgramName, const char* vertexShader, const char* fragmentShader)
 		{
 			if(!mInitalized) return NULL;
 			if(!g_RenderBinder) LOG_ERROR("render binder is not set", NULL);
 
-			DHASH id = makeShaderHash(vertexShader, fragmentShader);
-
 			//Schauen ob schon vorhanden
-			if(mShaderProgramEntrys.find(id) != mShaderProgramEntrys.end())
-			{
-				return mShaderProgramEntrys[id];
-			}
-			
-			ShaderProgramPtr shaderProgram(g_RenderBinder->newShaderProgram(id));    
-			if(shaderProgram->init(getShader(vertexShader, SHADER_VERTEX), getShader(fragmentShader, SHADER_FRAGMENT)))
-				LOG_ERROR("error loading shader program", NULL);
-			std::string shaderNames("Shader loaded: ");
-			shaderNames += vertexShader;
-			shaderNames += ", ";
-			shaderNames += fragmentShader;
+			DHASH id = makeShaderHash(shaderProgramName);
+			ShaderProgramPtr exist = getShaderProgram(id);
+			if (exist.getResourcePtrHolder()) return exist;
 
-			LOG_INFO(shaderNames.data());
-
+			ShaderProgramPtr shaderProgram(g_RenderBinder->newShaderProgram(shaderProgramName, id));
+			//shaderProgram->init(getShader(vertexShader, SHADER_VERTEX), getShader(fragmentShader, SHADER_FRAGMENT));
+			shaderProgram->addShader(vertexShader, SHADER_VERTEX);
+			shaderProgram->addShader(fragmentShader, SHADER_FRAGMENT);
+#ifdef _UNI_LIB_DEBUG
+			shaderProgram->checkIfBinaryExist(new LoadShaderCommand(shaderProgram, shaderProgramName));
+#else 
+			shaderProgram->checkIfBinaryExist(new LoadShaderCommand(shaderProgram));
+#endif
+			//*/
+			lock();
 			if(!mShaderProgramEntrys.insert(SHADER_PROGRAM_ENTRY(id, shaderProgram)).second)
 			{
+				unlock();
 				LOG_ERROR("Unerwarteter Fehler in ShaderManager::getShaderProgram aufgetreten", 0);
 			}
-
+			unlock();
 			return shaderProgram;
+
 		}
 
 		ShaderPtr ShaderManager::getShader(const char* shaderName, ShaderType shaderType)
@@ -103,10 +116,13 @@ namespace UniLib {
 			DHASH id = DRMakeFilenameHash(shaderName);
 
 			//Schauen ob schon vorhanden
+			lock();
 			if(mShaderEntrys.find(id) != mShaderEntrys.end())
 			{
+				unlock();
 				return mShaderEntrys[id];
 			}
+			unlock();
 
 			EngineLog.writeToLog("[ShaderManager::getShader] start loading shader (%s)!", shaderName);
 

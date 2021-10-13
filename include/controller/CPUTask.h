@@ -52,10 +52,14 @@ namespace UniLib {
 
 			virtual const char* getResourceType() const {return "CPUTask";};
 			virtual bool const isCPUTask() const {return true;}
+			//! \brief return true if task has finished, else false
+			//! automatic scheduling of task if he isn't finished and sheduled yet
+			virtual bool isTaskFinished() { return true; }
 
-			void start(TaskPtr own) {scheduleTask(own);}
-        protected:
 			virtual void scheduleTask(TaskPtr own);
+        protected:
+			void triggerSheduler() { mScheduler->checkPendingTasks(); }
+			
 		private: 
 			CPUSheduler* mScheduler;
         };

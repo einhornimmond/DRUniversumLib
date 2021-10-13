@@ -1,8 +1,10 @@
 #include "view/Material.h"
+#include "model/ShaderProgram.h"
 
 namespace UniLib {
 	namespace view {
 		Material::Material() 
+			: mUniformsSet(NULL)
 		{
 
 		}
@@ -11,5 +13,11 @@ namespace UniLib {
 		{
 
 		}
+
+		LoadingState Material::checkLoadingState()
+		{
+			return mShaderProgram->checkLoadingState();
+		}
+		
 	}
 }

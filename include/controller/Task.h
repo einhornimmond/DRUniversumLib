@@ -40,6 +40,8 @@ namespace UniLib {
         class UNIVERSUM_LIB_API Task;
         typedef DRResourcePtr<Task> TaskPtr;
 
+		
+
         class UNIVERSUM_LIB_API Task : public DRIResource
         {
         public:
@@ -47,14 +49,17 @@ namespace UniLib {
             Task(size_t parentTaskPointerArraySize);
             virtual ~Task();
 
+			virtual bool isReady() { return isAllParentsReady(); }
             // called from scheduler
             //! \brief return true if all parent task finished or return false and schedule not already finished parent tasks
             bool isAllParentsReady();
             //! \brief return true if task has finished, else false
             //! automatic scheduling of task if he isn't finished and sheduled yet
-            virtual bool isTaskFinished() = 0;
+			virtual bool isTaskFinished() { return false; }
             //! \brief called from task scheduler, maybe from another thread
             virtual DRReturn run() = 0;
+
+			
 
 			__inline__ void lock() {SDL_LockMutex(mWorkingMutex);}
 			__inline__ void unlock() {SDL_UnlockMutex(mWorkingMutex);}
@@ -73,6 +78,12 @@ namespace UniLib {
 
 			// from parent
 			virtual const char* getResourceType() const {return "Task";};
+#ifdef _UNI_LIB_DEBUG
+			virtual const char* getName() const { return mName.data(); }
+			__inline__ void setName(const char* name) { mName = name; }
+#else
+			virtual const char* getName() const { return ""; }
+#endif
 			virtual bool less_than(DRIResource& b) const {return false;};
 
 			// type check
@@ -80,13 +91,12 @@ namespace UniLib {
 			virtual bool const isGPUTask() const {return false;}
 			virtual bool const isCPUTask() const {return false;}
 
-			
+			virtual void scheduleTask(TaskPtr own) = 0;
         protected:
 			// scheduling only once
 			__inline__ bool isTaskSheduled() {return mTaskScheduled;}
 			__inline__ void taskScheduled() {mTaskScheduled = true;}
-			virtual void scheduleTask(TaskPtr own) = 0;
-            
+			
 			bool mTaskScheduled;
 			Command*	mFinishCommand;
         private:
@@ -94,6 +104,9 @@ namespace UniLib {
             size_t   mParentTaskPtrArraySize; 
             SDL_mutex* mWorkingMutex;
             bool     mDeleted;
+#ifdef _UNI_LIB_DEBUG
+			std::string mName;
+#endif
 			
         };
     }

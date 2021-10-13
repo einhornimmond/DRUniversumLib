@@ -196,6 +196,7 @@ DRFileErrorCodes DRFile::read(void* pDatenOut, size_t ulSize, size_t ulCount, si
 
 	//Aus Dati lesen
 //	const bool bResult = ReadFile(m_pFile, pDatenOut, lSize, &ulReadedBytesTemp, NULL) && ulReadedBytesTemp == lSize;
+	if (!mFile) LOG_ERROR("file isn't open anymore", File_error_file_is_not_open);
 	ulReadedBytesTemp = fread(pDatenOut, ulSize, ulCount, mFile);
 
 	// Wenn die tats�chlich gelesenen Bytes angefordert werden, werden diese auch �bergeben.

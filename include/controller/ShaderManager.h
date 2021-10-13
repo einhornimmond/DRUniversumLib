@@ -24,6 +24,7 @@
 #define __DR_UNIVERSUM_LIB_CONTROLLER_SHADER_MANAGER__
 
 #include "model/ShaderProgram.h"
+#include "lib/MultithreadContainer.h"
 
 namespace UniLib {
 /*	namespace model {
@@ -35,7 +36,9 @@ namespace UniLib {
 		typedef DRResourcePtr<Shader> ShaderPtr;
 	}*/
 	namespace controller {
-		class UNIVERSUM_LIB_API ShaderManager
+
+
+		class UNIVERSUM_LIB_API ShaderManager : public lib::MultithreadContainer
 		{
 		public:
 			
@@ -55,8 +58,8 @@ namespace UniLib {
 			void exit();
 
 			//! lädt oder return instance auf Textur
-			model::ShaderProgramPtr getShaderProgram(const char* vertexShader, const char* fragmentShader);
-			model::ShaderProgramPtr getShaderProgram(model::ShaderProgramParameter* shaderParameter);       
+			model::ShaderProgramPtr getShaderProgram(const char* shaderProgramName, const char* vertexShader, const char* fragmentShader);
+			model::ShaderProgramPtr getShaderProgram(const char* shaderProgramName);
 
 			model::ShaderPtr getShader(const char* shaderName, model::ShaderType shaderType);
 		protected:
@@ -64,8 +67,8 @@ namespace UniLib {
 			ShaderManager(const ShaderManager&);
 			virtual ~ShaderManager() {if(mInitalized) exit();};
 
-			DHASH makeShaderHash(const char* vertexShader, const char* fragmentShader);    
-
+			model::ShaderProgramPtr getShaderProgram(DHASH id);
+			DHASH makeShaderHash(const char* shaderProgramName);
 
 			//DRHashList mShaderEntrys;
 			std::map<DHASH, model::ShaderProgramPtr>               mShaderProgramEntrys;
@@ -74,8 +77,8 @@ namespace UniLib {
 			typedef std::pair<DHASH, model::ShaderPtr>             SHADER_ENTRY;
 			bool                                            mInitalized;
 #ifdef _UNI_LIB_DEBUG
-			std::map<DHASH, model::ShaderProgramParameter>			mHashCollisionCheckMap;
-			typedef std::pair<DHASH, model::ShaderProgramParameter> HASH_SHADER_ENTRY;
+			std::map<DHASH, DRString>			mHashCollisionCheckMap;
+			typedef std::pair<DHASH, DRString> HASH_SHADER_ENTRY;
 #endif
 		};
 

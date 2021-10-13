@@ -34,22 +34,40 @@
 #define __DR_UNIVERSUM_LIB_CONTROLLER_OCTREE_NODE_H__
 
 
-#include "Task.h"
+#include "model/Sektor.h"
 
 namespace UniLib {
+	namespace model {
+		class SektorID;
+	}
     namespace controller {
 		class OctreeNode;
 
-		class UNIVERSUM_LIB_API OctreeNode 
+		class UNIVERSUM_LIB_API OctreeNode : public model::Sektor
 		{
 		public:
-			OctreeNode(OctreeNode* parent = NULL);
+			OctreeNode(model::SektorID* id, model::Node* parent = NULL);
 			virtual ~OctreeNode();
 
+			// update 
+			virtual DRReturn move(float timeSinceLastFrame);
+
+			__inline__ model::Node* operator[] (DRVector3i index) {
+				assert(index.x == 0 || index.x == 1);
+				assert(index.y == 0 || index.y == 1);
+				assert(index.z == 0 || index.z == 1);
+				return mChilds[index.z*4+index.y*2+index.x];
+			}
+			__inline__ model::Node* operator[] (u8 index) {
+				assert(index >= 0 && index < 8);
+				return mChilds[index];
+			}
+
+			// get name of sektor type
+			virtual const char* getSektorType() { return "OctreeNode"; };			
 
 		protected:
-			OctreeNode* mParent;
-			OctreeNode* mChilds[4];
+			model::Node* mChilds[8];
 		};
 	}
 }

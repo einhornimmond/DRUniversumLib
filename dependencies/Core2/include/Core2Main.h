@@ -31,6 +31,7 @@
 //#define _DEBUG
 
 #ifdef _WIN32
+//#define _WINSOCKAPI_
 #include <windows.h>
 #include <direct.h>
 #else
@@ -41,6 +42,7 @@
 // standard includes
 #include <stdio.h>
 #include <string>
+#include <sstream>
 #include <malloc.h>
 #include <memory.h>
 #include <stdlib.h>
@@ -49,8 +51,8 @@
 #include <math.h>
 #include <list>
 #include <vector>
-
-
+#include <algorithm>
+#include <assert.h>
 
 /*  To use this exported function of dll, include this header
  *  in your project.
@@ -111,6 +113,10 @@ typedef char s8;
 typedef unsigned long long u64;
 #endif // u64
 
+#ifndef s64
+typedef long long s64;
+#endif // s64
+
 typedef unsigned int HASH;
 typedef unsigned long DHASH;
 
@@ -144,17 +150,22 @@ enum /*CORE_API*/ DRReturn
 #include "DRColor.h"
 #include "DRPlane.h"
 #include "DRMatrix.h"
+#include "DRBoundingBox.h"
+#include "DRBoundingBoxi.h"
 #include "DRRandom.h"
 #include "DRObjekt.h"
 #include "DRFrustumCulling.h"
 #include "DRIni.h"
 #include "DRDampingSpring.h"
 #include "DRCubicSpline.h"
+#include "DRBezierCurve.h"
+#include "DRPack2D.h"
 //#include "DRGeometrieGenerator.h"
 #include "DRHash.hpp"
 #include "DRHashList.hpp"
 #include "DRUtils.h"
 #include "DRFile.h"
+#include "DRVirtualFile.h"
 #include "DRLogger.h"
 #include "DRIResource.h"
 #include "DRResourcePtrHolder.h"

@@ -23,6 +23,7 @@
 #define __DR_CORE2_MATRIX__
 
 
+
 #include "stdio.h"
 #include "memory.h"
 #include "math.h"
@@ -36,6 +37,8 @@
     tbMatrix Klasse aus seiner TriBase Engine
     \author Dario Rekowski
     \date 07.12.09
+
+	TODO: Optimization for cache hits, cache line is 64 byte, but multiple cache lines exist
 */
 class CORE2_API DRMatrix
 {
@@ -102,6 +105,7 @@ public:
 		float		n[16];				// Eindimensionales Array der Elemente
 	};
 
+
     // Casting-Opeatoren
     //! \brief casting operator
     //! \return float Zeiger auf DRMatrix Elemente Array
@@ -136,15 +140,32 @@ public:
     //!     zum erstellen einer neuen DRMatrix als Ergebnis aus dieser DRMatrix * &uuml;bergebende DRMatrix
 	//! \param DRMatrix mit welcher Multipliziert werden soll
 	//! \return eine neue DRMatrix als Ergebnis aus this * mm
-	DRMatrix operator * (const DRMatrix& mm) const
-	{
+	// cache speed optimized, using ca. 10% time of default code bei 1000 parts in matrix:
+	//Q: https://lwn.net/Articles/255364/
+	/*
+	CLS = Cache Line Size, usually 64 Byte
+	#define SM (CLS / sizeof (double))
+
+	for (i = 0; i < N; i += SM)
+		for (j = 0; j < N; j += SM)
+			for (k = 0; k < N; k += SM)
+				for (i2 = 0, rres = &res[i][j],rmul1 = &mul1[i][k]; i2 < SM;++i2, rres += N, rmul1 += N)
+					for (k2 = 0, rmul2 = &mul2[k][j]; k2 < SM; ++k2, rmul2 += N)
+						for (j2 = 0; j2 < SM; ++j2)
+							rres[j2] += rmul1[k2] * rmul2[j2];
+
+	I don't t
+	*/
+	DRMatrix operator * (const DRMatrix& mm) const;
+	/*{
+		// scalar
 	    DRMatrix e(0.0f);
 	    for(int i = 0; i < 4; i++)
             for(int j = 0; j < 4; j++) 
 				for(int k = 0; k < 4; k++) 
 					e.m[i][j] += mm.m[k][j] * m[i][k];
         return e;
-	}
+	}*/
 	//! \brief Multiplikations Operator
     //!     zum auf Auf-Multiplizieren einer DRMatrix auf diese DRMatrix
 	//! \param DRMatrix mit welcher Multipliziert werden soll

@@ -25,7 +25,7 @@
 #define __UNI_LIB_MODEL_BLOCK_BLOCK_TYPE_H
 
 //#include "UniversumLib.h"
-#include "lib/MultithreadContainer.h"
+#include "lib/MultithreadResource.h"
 /*!
  *
  * \author: Dario Rekowski
@@ -41,26 +41,16 @@ namespace UniLib {
 	namespace model {
 		namespace block {
 
-			enum BlockTypeLoadingState {
-				// empty structure
-				BLOCK_TYPE_EMPTY = 0,
-				// has every information needed to load
-				BLOCK_TYPE_HAS_INFORMATIONS = 1,
-				// work on loading resources
-				BLOCK_TYPE_PARTLY_LOADED = 2,
-				// fully loaded and ready for using
-				BLOCK_TYPE_FULLY_LOADED = 4
-			};
-
 			enum BlockBaseType {
-				BLOCK_BASE_TYPE_SOLID = 0,
-				BLOCK_BASE_TYPE_FLUENT = 1,
-				BLOCK_BASE_TYPE_GAS = 2
+				BLOCK_BASE_TYPE_NONE = 0,
+				BLOCK_BASE_TYPE_SOLID = 1,
+				BLOCK_BASE_TYPE_FLUENT = 2,
+				BLOCK_BASE_TYPE_GAS = 3
 			};
 
 			
 
-			class UNIVERSUM_LIB_API BlockType : public DRIResource, protected lib::MultithreadContainer
+			class UNIVERSUM_LIB_API BlockType : public lib::MultithreadResource
 			{
 			public:
 				BlockType(std::string name);
@@ -68,7 +58,7 @@ namespace UniLib {
 
 				virtual const char* getResourceType() const {return "BlockType";}
 				virtual bool less_than(DRIResource& b) const {
-					return mId <  dynamic_cast<BlockType&>(b).mId;
+					return mId <  static_cast<BlockType&>(b).mId;
 				}
 
 				// getter
@@ -77,13 +67,16 @@ namespace UniLib {
 				__inline__ float getDensity() {return mDensity;}
 				__inline__ float getMeltingPoint() {return mMeltingPoint;}
 				__inline__ int getHitPoints() {return mHitpoints;}
+				__inline__ BlockBaseType getBaseType() { return mBaseType; }
 
 				// setter 
 				__inline__ void setId(HASH id) {mId = id;}
+
+				// for debugging
+				std::string asString();
 			protected:
 				// control
 				int mId;
-				BlockTypeLoadingState mLoadingState;
 
 				// block attributes
 				std::string mName;
