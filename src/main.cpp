@@ -8,6 +8,7 @@
 // some dll stuff for windows
 int         g_iProzess = 0;
 int			g_iProzessFunk = 0;
+UniLib::controller::BindToRenderer* UniLib::g_RenderBinder = NULL;
 
 UniLib::controller::BindToRenderer* UniLib::g_RenderBinder = NULL;
 UniLib::controller::CPUSheduler* UniLib::g_HarddiskScheduler = NULL;
@@ -58,7 +59,7 @@ namespace UniLib {
     {
 		SDL_Init(SDL_INIT_TIMER);
         Core2_init("Logger.html");
-        EngineLog.init("EngineLogger.html", true);     
+        EngineLog.init("EngineLogger.html", true);        
 		SpeedLog.init("SpeedLogger.html", false);
 		g_HarddiskScheduler = new controller::CPUSheduler(numberParallelStorageOperations, "ioThrd");
 #ifdef _WINDOWS_

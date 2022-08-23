@@ -49,7 +49,7 @@ namespace UniLib {
 		public:
 			BlockSektor(Node* parent, model::SektorID* id, view::BlockSektor* viewSektor);
 			virtual ~BlockSektor();
-			
+
 			__inline__ block::BlockPtr operator[] (DRVector3i index) const
 			{
 				assert(index.x >= 0 && index.x < 8);

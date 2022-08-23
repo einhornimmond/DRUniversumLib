@@ -52,6 +52,7 @@ namespace UniLib {
 			protected:
 				std::string mVertexShaderName;
 				std::string mFragmentShaderName;
+				
 
 			};
 		}

@@ -13,7 +13,7 @@ DRReturn DRFrustumCulling::updateMatritzen(DRReal fovAngle, DRReal aspectRatio, 
     if(!mCamera) LOG_ERROR("no cam!", DR_ERROR);
     
     this->mAspectRatio = aspectRatio;
-    this->mFovAngle = fovAngle * ANG2RAD;
+    this->mFovAngle = fovAngle * static_cast<DRReal>(ANG2RAD);
     this->mNearPlane = zNearPlane;
     this->mFarPlane = zFarPlane;	
     this->mFovAngleTangent = tan(this->mFovAngle);
@@ -43,7 +43,8 @@ DRReturn DRFrustumCulling::updateMatritzen(DRReal fovAngle, DRReal aspectRatio, 
 
 DRFrustumPosition DRFrustumCulling::isPointInFrustum(const DRVector3& point)
 {
-    DRReal pcz,pcx,pcy,aux;
+    DRReal pcz;
+    double pcx, pcy, aux;
 
     if(!mCamera) return FR_ERROR;
     // p = point
@@ -53,27 +54,28 @@ DRFrustumPosition DRFrustumCulling::isPointInFrustum(const DRVector3& point)
     // compute and test the Z coordinate (Z -Axis)
     pcz = v.dot(-mCamera->getZAxis());
     if (pcz > mFarPlane || pcz < mNearPlane)
-            return OUTSIDE;
+        return OUTSIDE;
   
     // compute and test the Y coordinate
-    pcy = v.dot(mCamera->getYAxis());
-    aux = pcz * mFovAngleTangent;
+    pcy = static_cast<double>(v.dot(mCamera->getYAxis()));
+    aux = static_cast<double>(pcz) * mFovAngleTangent;
     if (pcy > aux || pcy < -aux)
-            return OUTSIDE;
+        return OUTSIDE;
 
     // compute and test the X coordinate
-    pcx = v.dot(mCamera->getXAxis());
-    aux = aux * mAspectRatio;
+    pcx = static_cast<double>(v.dot(mCamera->getXAxis()));
+    aux = aux * static_cast<double>(mAspectRatio);
     if (pcx > aux || pcx < -aux)
-            return OUTSIDE;
+        return OUTSIDE;
 
     return INSIDE;
 }
 
 DRFrustumPosition DRFrustumCulling::isSphereInFrustum(const DRVector3& middlePoint, DRReal radius)
 {
-    float d1,d2;
-    float az,ax,ay,zz1,zz2;
+    double d1, d2;
+    float az, ax, ay;
+    double zz1, zz2;
     DRFrustumPosition result = INSIDE;
     
     if(!mCamera) return FR_ERROR;

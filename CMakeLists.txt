@@ -8,7 +8,9 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
 
 SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ../lib)
 SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ../bin)
-
+IF(WIN32)
+	set(CMAKE_CXX_FLAGS         "/MP /EHsc")
+ENDIF()
 
 SUBDIRS(src test dependencies/jsoncpp dependencies/Core2 dependencies/UniNetwork dependencies/Image)
 #ADD_SUBDIRECTORY(dependencies/Core2 dependencies/Network)

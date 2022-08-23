@@ -65,8 +65,8 @@ public:
     void pushState(DRGameStatePtr gameState);
     void popState();
 
-    int getStateCount() const {return mGameStates.size();}
-    int getConstantStateCount() const {return mConstantGameStates.size();}
+    size_t getStateCount() const {return mGameStates.size();}
+    size_t getConstantStateCount() const {return mConstantGameStates.size();}
     
     DRReturn move(float fTime);
     DRReturn render(float fTime);

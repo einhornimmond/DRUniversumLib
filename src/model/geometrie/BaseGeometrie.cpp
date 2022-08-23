@@ -9,7 +9,7 @@ namespace UniLib {
 			  mVertexFormatFlags(GEOMETRIE_NONE), mVertexSize(0), mRenderMode(GEOMETRIE_RENDER_TRIANGLES)
 			{
 			}
-
+			
 			BaseGeometrie::~BaseGeometrie()
 			{
 				deleteFillingStructures();
@@ -24,7 +24,7 @@ namespace UniLib {
 					mGeometrieDataMap.insert(GeometrieDataMapPair(type, new GeometriePartVector(type)));
 					it = mGeometrieDataMap.find(type);
 					assert(it != mGeometrieDataMap.end());
-				}
+			}
 				return it->second;
 			}
 			void BaseGeometrie::addVector(DRVector3 v3, GeometrieDataType type)
@@ -81,17 +81,17 @@ namespace UniLib {
 						}
 					}
 
-				}
+			}
 
 				//indices
 				mIndiceCount = mIndices.size();
 				mIndicesArray = new int[mIndiceCount];
 				for(int i = 0; i < mIndiceCount; i++) {
 					mIndicesArray[i] = mIndices[i];
-				}
+		}
 				return DR_OK;
 
-			}
+	}
 			void BaseGeometrie::deleteFillingStructures()
 			{
 				for(GeometrieDataMapIterator it = mGeometrieDataMap.begin(); it != mGeometrieDataMap.end(); it++) {

@@ -77,10 +77,10 @@ public:
 	unsigned long getSize();
 
 	//Daten in die ge�ffnete Datei schreiben
-	DRFileErrorCodes write(const void* pDatenIn, unsigned long ulSize, unsigned long ulCount, unsigned long* plWrittenBytesOut = NULL);
+	DRFileErrorCodes write(const void* pDatenIn, size_t ulSize, size_t ulCount, size_t* plWrittenBytesOut = NULL);
 
 	//Daten aus datei lesen
-	DRFileErrorCodes read(void* pDatenOut, unsigned long ulSize, unsigned long ulCount, unsigned long* plReadedBytesOut = NULL);
+	DRFileErrorCodes read(void* pDatenOut, size_t ulSize, size_t ulCount, size_t* plReadedBytesOut = NULL);
 
 	//Zuweisungsoperator
 	const DRFile& operator = (const DRFile& otherFile) {mFile = otherFile.mFile; return *this;}

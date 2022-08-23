@@ -1,8 +1,10 @@
 
 //Infos siehe Header
-
+#define  _CRT_SECURE_NO_WARNINGS
 #include "Core2Main.h"
 #include "DRFileManager.h"
+
+
 
 //Konstruktor, Copykonstruktor und Deskonstruktor
 DRFile::DRFile()
@@ -56,9 +58,9 @@ DRFileErrorCodes DRFile::open(const wchar_t* pstFilename, const wchar_t* pstMode
 	//							Filename	lesen und schreiben, teilrecht, datensicherheit, verhalten, erstellungsoptionen (verstckt, etc), Zeiger auf T setzen
 //	if ((m_pFile = CreateFileW(stFilename.c_str(), GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL)) != INVALIDR_HANDLE_VALUE)
   //      return File_OK;
+	auto result = _wfopen_s(&mFile, pstFilename, pstMode);
 
-	mFile = _wfopen(pstFilename, pstMode);
-	if(mFile == NULL) return File_error_File_didnt_exist;
+	if(result) return File_error_File_didnt_exist;
 	//Neue Datei erstellen
 	//erstellen mit normalen Rechten und allen Datei-Attributen
 //	if ((m_pFile = CreateFileW(stFilename.c_str(), GENERIC_ALL, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL)) == INVALIDR_HANDLE_VALUE)
@@ -155,7 +157,7 @@ unsigned long DRFile::getSize()
 //*******************************************************************************************************
 
 //In Datei schreiben
-DRFileErrorCodes DRFile::write(const void* pDatenIn, unsigned long ulSize, unsigned long ulCount, unsigned long* plWrittenBytesOut /* = NULL */)
+DRFileErrorCodes DRFile::write(const void* pDatenIn, size_t ulSize, size_t ulCount, size_t* plWrittenBytesOut /*= NULL*/)
 {
 	//wenn datei nicht offen, dann abbruch
 	if(!isOpen()) return File_error_file_is_not_open;
@@ -164,7 +166,7 @@ DRFileErrorCodes DRFile::write(const void* pDatenIn, unsigned long ulSize, unsig
 	if(!pDatenIn) return File_error_NullPointer;
 
 	//zwischen speicherung
-	unsigned long ulWrittenBytesTemp;
+	size_t ulWrittenBytesTemp;
 
 	// Daten schreiben und pr�fen, dass auch alle Daten vollst�ndig in die Datei geschrieben wurde.
   //  const bool bResult = WriteFile(m_pFile, pDatenIn, lSize, &ulWrittenBytesTemp, NULL) && ulWrittenBytesTemp == lSize;
@@ -183,14 +185,14 @@ DRFileErrorCodes DRFile::write(const void* pDatenIn, unsigned long ulSize, unsig
 //*********************************************************************************************************
 
 //Aus Datei lesen
-DRFileErrorCodes DRFile::read(void* pDatenOut, unsigned long ulSize, unsigned long ulCount, unsigned long* plReadedBytesOut /* = NULL */)
+DRFileErrorCodes DRFile::read(void* pDatenOut, size_t ulSize, size_t ulCount, size_t* plReadedBytesOut /*= NULL*/)
 {
 	//wenn datei nicht offen, dann abbruch
 	if(!isOpen()) return File_error_file_is_not_open;
 
 
 	//zwischen speicherung
-	unsigned long ulReadedBytesTemp = 0;
+	size_t ulReadedBytesTemp = 0;
 
 	//Aus Dati lesen
 //	const bool bResult = ReadFile(m_pFile, pDatenOut, lSize, &ulReadedBytesTemp, NULL) && ulReadedBytesTemp == lSize;
@@ -244,7 +246,7 @@ DRFileErrorCodes DRFile::setFilePointer(s32 ulDistance, unsigned long ulStartPoi
 	if(!isOpen()) return File_error_file_is_not_open;
 
 	//Ist die Distanz gr��er als die Dateigr��e?
-	if(abs(ulDistance) > getSize()) return File_error_pointer_distance_to_great;
+	if(static_cast<unsigned long>(abs(ulDistance)) > getSize()) return File_error_pointer_distance_to_great;
 
 	//Ist die Start Position die aktuelle Position?
 	if(ulStartPoint == SEEK_CUR)

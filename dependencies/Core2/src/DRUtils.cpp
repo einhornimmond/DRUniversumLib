@@ -41,7 +41,7 @@ DRReturn DRGetTermVorChar(DRString* sInput, DRString* sOutput, char cTrenn)
 
 DRReturn DRGetTermNachChar(DRString* sInput, DRString* sOutput, char cTrenn)
 {
-	int n = sInput->length(), n2 = sInput->length();
+	size_t n = sInput->length(), n2 = sInput->length();
 	const char* pcTemp = sInput->data();
 	char* pcOut = new char[sInput->length()];
 	while(pcTemp[n] != cTrenn)
@@ -127,10 +127,10 @@ bool DRisNumber(char cZeichen)
 // Entfernt HTML-Tags aus einem String
 DRReturn DRRemoveHTMLTags(char* pcIn,
 						char* pcOut,
-						u32 dwOutLength)
+						size_t dwOutLength)
 {
-	u32 dwInLength = strlen(pcIn);
-	u32 dwOut = 0;
+	size_t dwInLength = strlen(pcIn);
+	size_t dwOut = 0;
 
 
 	memset(pcOut, 0, dwOutLength);
@@ -329,7 +329,7 @@ DRReturn DRGetPfad(const char* pcInput, char* pcOutput, int iOutBufferSize /* = 
 	   !pcOutput) return DR_ZERO_POINTER;
 
 	int iMark = 0;
-	int iLength = strlen(pcInput);
+	size_t iLength = strlen(pcInput);
 	int i = 0;
 	for (i = 0; i < iLength; i++)
 	{

@@ -1,16 +1,26 @@
 #include "Core2Main.h"
+#include <sstream>
 
 //Konstuktor und Deskonstruktor
 DRLogger::DRLogger()
 : m_bPrintToConsole(false)
 {
 	//m_pFile = NULL;
+#ifdef _WIN32 
+	strcpy_s(m_acFilename, "NotInitLogger.html");
+#else 
 	strcpy(m_acFilename, "NotInitLogger.html");
+#endif
 }
 
 DRLogger::DRLogger(const DRLogger& log)
 {
+#ifdef _WIN32 
+	strcpy_s(m_acFilename, log.m_acFilename);
+#else
     strcpy(m_acFilename, log.m_acFilename);
+#endif
+
 }
 
 //------------------------------------------------------
@@ -27,7 +37,11 @@ DRReturn DRLogger::init(const char* pcFilename, bool printToConsole)
     
 	//Filenamen kopieren
 	//sprintf(m_acFilename, pcFilename);
+#ifdef _WIN32
+	strcpy_s(m_acFilename, pcFilename);
+#else 
 	strcpy(m_acFilename, pcFilename);
+#endif
 
 	//�ffnen zum �berschreiben
 	//m_pFile = fopen(m_acFilename, "w");
@@ -90,13 +104,13 @@ DRReturn DRLogger::writeVector2ToLog(const DRVector2& v, const char* name)
 DRReturn DRLogger::writeVector3ToLog(const DRVector3& v, const char* pcName /* = NULL */)
 {
 	// 3D-Vektor in die Logbuchdatei schreiben
-	char acName[64];
-	if(pcName)
-		sprintf(acName, "3D-Vektor %s:", pcName);
-	else
-		sprintf(acName, "3D-Vektor:");
+	std::stringstream name;
+	name << "3D-Vektor";
+	if (pcName) name << " " << pcName;
+	else name << ":";
+
 	return writeToLogDirect("<tr><td><font size=\"2\"><b><font color=\"#000080\">%s</font></b> x = <i>%.3f</i>, y = <i>%.3f</i>, z = <i>%.3f</i>, Laenge = <i>%.3f</i></td></tr>",
-		                     acName, v.x, v.y, v.z, v.length());
+		                     name.str().data(), v.x, v.y, v.z, v.length());
 }
 
 // ******************************************************************
@@ -139,8 +153,11 @@ DRReturn DRLogger::writeMatrixToLog(const DRMatrix& m, const char* name)
 DRReturn DRLogger::writeColorToLog(const DRColor& c)
 {
 	char acHexColor[9];
-
+#ifdef _WIN32
+	sprintf_s(acHexColor, "%x", (int)(c) << 8);
+#else 
 	sprintf(acHexColor, "%x", (int)(c) << 8);
+#endif
 	acHexColor[6] = 0;
 
 	// Farbe in die Logbuchdatei schreiben
@@ -186,7 +203,11 @@ DRReturn DRLogger::writeToLog(const char* pcText, ...)
 
 	//Buffer fuellen
 	va_start(Argumente, pcText);
+#ifdef _WIN32
+	vsprintf_s(acBuffer, pcText, Argumente);
+#else 
 	vsprintf(acBuffer, pcText, Argumente);
+#endif
 	va_end(Argumente);
     
     return writeToLog(DRString(acBuffer));
@@ -212,7 +233,11 @@ DRReturn DRLogger::writeToLogDirect(const char* pcText, ...)
 
 	//Buffer fuellen
 	va_start(Argumente, pcText);
+#ifdef _WIN32
+	vsprintf_s(acBuffer, pcText, Argumente);
+#else 
 	vsprintf(acBuffer, pcText, Argumente);
+#endif
 	va_end(Argumente);
     
     return writeToLogDirect(DRString(acBuffer));
@@ -230,14 +255,18 @@ DRReturn DRLogger::writeToLogDirect(DRString text)
 
     if(m_bPrintToConsole)
     {
-        int size = text.size();
+        size_t size = text.size();
         char* buffer1 = new char[size+1];
         char* buffer2 = new char[size+1];
 		memset(buffer1, 0, sizeof(size+1));
 		memset(buffer2, 0, sizeof(size+1));
         if(buffer1 && buffer2)
         {
-            strcpy(buffer1, text.data());
+#ifdef _WIN32
+            strcpy_s(buffer1, size+1, text.data());
+#else
+			strcpy(buffer1, text.data());
+#endif
             DRRemoveHTMLTags(buffer1, buffer2, size);
             printf("%s\n", buffer2);
             DR_SAVE_DELETE_ARRAY(buffer1);

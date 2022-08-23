@@ -60,6 +60,7 @@
 #include <type_traits>
 #include "lib/MultithreadQueue.h"
 #include "lib/Logging.h"
+#include "controller/BindToRenderer.h"
 #include "json/json.h"
 #include "rapidjson/document.h"
 
@@ -72,7 +73,7 @@ namespace UniLib {
 	namespace controller {
 		class BindToRenderer;
 		class CPUSheduler;
-	}
+}
 	UNIVERSUM_LIB_API extern controller::BindToRenderer* g_RenderBinder;
 	UNIVERSUM_LIB_API extern controller::CPUSheduler* g_HarddiskScheduler;
 #ifdef _WINDOWS_

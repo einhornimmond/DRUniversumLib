@@ -1,4 +1,5 @@
 //#include "DRFileManager.h"
+#define _CRT_SECURE_NO_WARNINGS
 #include "Core2Main.h"
 
 using namespace std;
@@ -184,7 +185,11 @@ DRFile* DRFileManager::startWriting(const char* pcPfadName, const char* pcFilena
         if(!isFileOK(pTempFile)) return NULL;
         pTempFile->setFilePointer(pTempFile->getSize()-8, SEEK_SET);
 
-        unsigned short u16HeaderLength = 2*sizeof(long) + sizeof(int) + sizeof(short) + strlen(pcFilename);
+		size_t realHeaderLength = 2 * sizeof(long) + sizeof(int) + sizeof(short) + strlen(pcFilename);
+        unsigned short u16HeaderLength = static_cast<unsigned short>(realHeaderLength);
+		if (realHeaderLength != static_cast<size_t>(u16HeaderLength)) {
+			LOG_ERROR("filename is to long, couldn't packed into short header!", NULL);
+		}
         DHASH ID = DRMakeDoubleHash(pcTyp, pcFilename);
 
         //BlockHeader schreiben
@@ -192,7 +197,7 @@ DRFile* DRFileManager::startWriting(const char* pcPfadName, const char* pcFilena
         pTempFile->write(&ulBlockLength, sizeof(unsigned long), 1);
         pTempFile->write(&ID, sizeof(DHASH), 1);
         //pstrFilename->Save(pTempFile);
-        int istrLength = strlen(pcFilename);
+        size_t istrLength = strlen(pcFilename);
         pTempFile->write(&istrLength, sizeof(int), 1);
         pTempFile->write(pcFilename, sizeof(char), istrLength);
 
@@ -221,10 +226,10 @@ DRFile* DRFileManager::startWriting(const char* pcPfadName, const char* pcFilena
 	else
 	{
 		u32 filePointer = pTempFile->getFilePointer();
-		int iStrLen = strlen(pcFilename);
+		size_t iStrLen = strlen(pcFilename);
 		//filePointer -= iStrLen*sizeof(char) + sizeof(int) + sizeof(DHASH) + sizeof(u32);
 		u32 blockLength = 0;
-		pTempFile->setFilePointer(-(iStrLen*sizeof(char) + sizeof(int) + sizeof(DHASH) + sizeof(u32)), SEEK_CUR);
+		pTempFile->setFilePointer(-static_cast<s32>(iStrLen*sizeof(char) + sizeof(int) + sizeof(DHASH) + sizeof(u32)), SEEK_CUR);
 		u32 now = pTempFile->getFilePointer();
 		pTempFile->read(&blockLength, sizeof(unsigned long), 1);
 		pTempFile->setFilePointer(filePointer, SEEK_SET);

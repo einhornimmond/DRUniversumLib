@@ -67,7 +67,7 @@ namespace UniLib {
 		model::ShaderProgramPtr ShaderManager::getShaderProgram(DHASH id)
 		{
 			lock();
-			if (mShaderProgramEntrys.find(id) != mShaderProgramEntrys.end())
+			if(mShaderProgramEntrys.find(id) != mShaderProgramEntrys.end())
 			{
 				unlock();
 				return mShaderProgramEntrys[id];
@@ -75,7 +75,7 @@ namespace UniLib {
 			unlock();
 			return NULL;
 		}
-
+			
 		//!
 		ShaderProgramPtr ShaderManager::getShaderProgram(const char* shaderProgramName, const char* vertexShader, const char* fragmentShader)
 		{
@@ -98,7 +98,7 @@ namespace UniLib {
 #endif
 			//*/
 			lock();
-			if (!mShaderProgramEntrys.insert(SHADER_PROGRAM_ENTRY(id, shaderProgram)).second)
+			if(!mShaderProgramEntrys.insert(SHADER_PROGRAM_ENTRY(id, shaderProgram)).second)
 			{
 				unlock();
 				LOG_ERROR("Unerwarteter Fehler in ShaderManager::getShaderProgram aufgetreten", 0);

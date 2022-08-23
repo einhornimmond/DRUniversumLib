@@ -134,7 +134,7 @@ namespace UniLib {
 					std::vector<float> mRawData;
 
 					__inline__ void addFloats(float* c, int count);
-				};
+			};
 				// filling structure
 				typedef std::map<GeometrieDataType, GeometriePartVector*>::iterator GeometrieDataMapIterator;
 				typedef std::pair<GeometrieDataType, GeometriePartVector*> GeometrieDataMapPair;
