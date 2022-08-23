@@ -34,7 +34,6 @@
 #define __UNIVERSUM_LIB_MODEL_GEOMETRIE_RECT2D_COLLECTION__H
 
 #include "BaseGeometrie.h" 
-#include "Core2/DRPack2D.h"
 
 namespace UniLib {
 

@@ -1,5 +1,4 @@
 # Network
-cmake_minimum_required(VERSION 2.6)
 
 PROJECT(scripts/Network CXX)
 
@@ -15,7 +14,6 @@ INCLUDE_DIRECTORIES(../include)
 INCLUDE_DIRECTORIES(../bin)
 INCLUDE_DIRECTORIES(../../bin)
 INCLUDE_DIRECTORIES(../../include)
-
 
 
 

@@ -61,16 +61,7 @@ namespace DRFilePart {
 	};
 	class Binary : public FilePart {
 	public: 
-		Binary(void* _data, size_t _size, bool copyData = false, bool freeMemory = true)
-			: mSize(_size), mFreeMemory(freeMemory) {
-			if (copyData) {
-				mData = (void*)malloc(_size);
-				memcpy(mData, _data, _size);
-			}
-			else {
-				mData = _data;
-			}
-		}
+		Binary(void* _data, size_t _size, bool copyData = false, bool freeMemory = true);
 		Binary(bool freeMemory = true)
 			: mData(NULL), mSize(0), mFreeMemory(freeMemory) {}
 		virtual ~Binary() {
@@ -196,16 +187,7 @@ class CORE2_API DRVirtualBinaryFile : public DRVirtualFile
 public:
 	DRVirtualBinaryFile(bool freeMemory = true) :
 		mBinSize(0), mBinData(NULL), mFreeMemory(freeMemory) {}
-	DRVirtualBinaryFile(void* data, size_t size, bool copyData = true, bool freeMemory = true) :
-		mBinSize(size), mFreeMemory(freeMemory) {
-		if (copyData) {
-			mBinData = (void*)malloc(size);
-			memcpy(mBinData, data, size);
-		}
-		else {
-			mBinData = data;
-		}
-	}
+	DRVirtualBinaryFile(void* data, size_t size, bool copyData = true, bool freeMemory = true);
 	~DRVirtualBinaryFile() {
 		if (mFreeMemory) free(mBinData);
 	}
@@ -261,7 +243,7 @@ public:
 	inline operator u8() { return dynamic_cast<DRFilePart::Byte*>(read())->value(); };
 	inline operator double() { return dynamic_cast<DRFilePart::Double*>(read())->value(); };
 	inline operator std::string() { return std::string((const char*)dynamic_cast<DRFilePart::String*>(read())->data()); };
-	inline operator const char*() { return (const char*)dynamic_cast<DRFilePart::Integer*>(read())->value(); };
+	//inline operator const char*() { return (const char*)dynamic_cast<DRFilePart::Integer*>(read())->value(); };
 
 	virtual DRReturn saveToFile(const char* filename);
 	virtual DRReturn readFromFile(const char* filename);

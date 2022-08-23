@@ -2,8 +2,20 @@
 
 #define VIRTUAL_FILE_VERSION 1
 
-
 using namespace DRFilePart;
+
+Binary::Binary(void* _data, size_t _size, bool copyData/* = false*/, bool freeMemory/* = true*/)
+	: mSize(_size), mFreeMemory(freeMemory) 
+{
+	if (copyData) {
+		mData = (void*)malloc(_size);
+		if (!mData) throw DRMemoryException("malloc don't reserve memory", _size);
+		memcpy(mData, _data, _size);
+	}
+	else {
+		mData = _data;
+	}
+}
 
 String::String(const char* charBuffer, size_t count)
 {
@@ -108,6 +120,20 @@ DRReturn DRVirtualCustomFile::readFromFile(const char* filename)
 // ********************************************************************
 // Virtual Binary File
 // ********************************************************************
+
+DRVirtualBinaryFile::DRVirtualBinaryFile(void* data, size_t size, bool copyData/* = true*/, bool freeMemory/* = true*/)
+	: mBinSize(size), mFreeMemory(freeMemory) 
+{
+	if (copyData) {
+		mBinData = (void*)malloc(size);
+		if (!mBinData) throw DRMemoryException("malloc don't reserve memory", size);
+		memcpy(mBinData, data, size);
+	}
+	else {
+		mBinData = data;
+	}
+}
+
 DRReturn DRVirtualBinaryFile::readFromFile(const char* filename)
 {
 	DRFile file(filename, "rb");

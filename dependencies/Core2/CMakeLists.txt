@@ -20,8 +20,6 @@ INCLUDE_DIRECTORIES(../bin)
 INCLUDE_DIRECTORIES(../../bin)
 INCLUDE_DIRECTORIES(../../include)
 
-cmake_minimum_required(VERSION 2.6)
-
 
 #ADD_LIBRARY(Core2 SHARED core2main.cpp)
 #ADD_EXECUTABLE(test ${testSrc})

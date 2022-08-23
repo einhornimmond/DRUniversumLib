@@ -1,5 +1,5 @@
 # Engine2
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.2)
 
 PROJECT(DRUniversumLib CXX)
 
@@ -16,6 +16,7 @@ SUBDIRS(src test dependencies/jsoncpp dependencies/Core2 dependencies/UniNetwork
 #ADD_SUBDIRECTORY(dependencies/Core2 dependencies/Network)
 INCLUDE_DIRECTORIES(import/include import/bin import/lib)
 INCLUDE_DIRECTORIES(include)
+INCLUDE_DIRECTORIES(dependencies/Core2/include)
 INCLUDE_DIRECTORIES(lib)
 INCLUDE_DIRECTORIES(bin)
 

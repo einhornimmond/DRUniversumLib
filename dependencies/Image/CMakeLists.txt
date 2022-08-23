@@ -15,7 +15,6 @@ if(WIN32)
 INCLUDE_DIRECTORIES(dependencies/freeimage)
 endif(WIN32)
 
-cmake_minimum_required(VERSION 2.6)
 
 
 #ADD_LIBRARY(Core2 SHARED core2main.cpp)

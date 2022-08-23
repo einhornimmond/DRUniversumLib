@@ -34,7 +34,7 @@ namespace UniLib {
 			mInitialized = false;
 		}
 
-		void CPUShedulerTasksLog::addTaskLogEntry(HASH id, const char* resourcesTypeName, const char* threadName, const char* name/* = NULL*/)
+		void CPUShedulerTasksLog::addTaskLogEntry(void* id, const char* resourcesTypeName, const char* threadName, const char* name/* = NULL*/)
 		{
 			
 			lock();
@@ -44,7 +44,7 @@ namespace UniLib {
 			//if(id != 1)
 				//printCurrentlyRunningTasks();
 		}
-		void CPUShedulerTasksLog::removeTaskLogEntry(HASH id)
+		void CPUShedulerTasksLog::removeTaskLogEntry(void* id)
 		{
 			lock();
 			TaskLogEntryMap::iterator it = mTaskLogEntrys.find(id);

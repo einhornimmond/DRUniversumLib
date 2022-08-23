@@ -1,9 +1,7 @@
 PROJECT(DRImage CXX)
 
-cmake_minimum_required(VERSION 2.6)
-
 # Image src
-SET(ImageSrc DRImage DRImageMain)
+SET(ImageSrc DRImage.cpp DRImageMain.cpp)
 
 SET(PA ../../bin)
 

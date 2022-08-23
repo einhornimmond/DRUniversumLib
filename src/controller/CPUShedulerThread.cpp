@@ -33,11 +33,11 @@ namespace UniLib {
 				lib::TimeCounter counter;
 				debug::CPUShedulerTasksLog* l = debug::CPUShedulerTasksLog::getInstance();
 				const char* name = mWaitingTask->getName();
-				l->addTaskLogEntry((HASH)mWaitingTask.getResourcePtrHolder(), mWaitingTask->getResourceType(), mName.data(), name);
+				l->addTaskLogEntry(mWaitingTask.getResourcePtrHolder(), mWaitingTask->getResourceType(), mName.data(), name);
 #endif 
 				mWaitingTask->run();
 #ifdef _UNI_LIB_DEBUG
-				l->removeTaskLogEntry((HASH)mWaitingTask.getResourcePtrHolder());
+				l->removeTaskLogEntry(mWaitingTask.getResourcePtrHolder());
 				SpeedLog.writeToLog("%s used on thread: %s by Task: %s of: %s",
 					counter.string().data(), mName.data(), mWaitingTask->getResourceType(), name);
 #endif

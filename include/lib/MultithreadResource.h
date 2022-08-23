@@ -42,6 +42,7 @@ namespace UniLib {
 		{
 		public:
 			MultithreadResource() : mLoadingState(LOADING_STATE_EMPTY) {};
+			MultithreadResource(LoadingState loadingState) : mLoadingState(loadingState) {}
 			virtual ~MultithreadResource() {};
 
 			virtual bool less_than(MultithreadResource& b) { return mLoadingState < b.mLoadingState; }

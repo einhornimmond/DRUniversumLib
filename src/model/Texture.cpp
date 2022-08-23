@@ -20,7 +20,7 @@ namespace UniLib {
 
 		DHASH Texture::calculateHash(DRVector2i size, GLenum format)
 		{
-			return size.x | size.y << 16 | (DHASH)(format) << 32;
+			return size.x | size.y << 16 | (DHASH)(format) << 4;
 		}
 
 		DRReturn Texture::loadFromFile(const char* filename)

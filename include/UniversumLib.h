@@ -60,7 +60,6 @@
 #include <type_traits>
 #include "lib/MultithreadQueue.h"
 #include "lib/Logging.h"
-#include "controller/BindToRenderer.h"
 #include "json/json.h"
 #include "rapidjson/document.h"
 
@@ -68,18 +67,18 @@
 #include <sstream>
 
 namespace UniLib {
-    UNIVERSUM_LIB_API extern lib::EngineLogger EngineLog;
+	UNIVERSUM_LIB_API extern lib::EngineLogger EngineLog;
 	UNIVERSUM_LIB_API extern lib::EngineLogger SpeedLog;
 	namespace controller {
 		class BindToRenderer;
 		class CPUSheduler;
-}
+	};
 	UNIVERSUM_LIB_API extern controller::BindToRenderer* g_RenderBinder;
 	UNIVERSUM_LIB_API extern controller::CPUSheduler* g_HarddiskScheduler;
 #ifdef _WINDOWS_
 	extern LARGE_INTEGER g_QueryPerformanceFreq;
 #endif // _WINDOWS_
-}
+};
 
 #undef WRITETOLOG
 #undef LOG_ERROR

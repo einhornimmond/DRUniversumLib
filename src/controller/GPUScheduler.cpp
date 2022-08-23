@@ -101,14 +101,14 @@ namespace UniLib {
 				if (task->isReady()) {
 
 #ifdef _UNI_LIB_DEBUG
-					l->addTaskLogEntry((HASH)task.getResourcePtrHolder(), task->getResourceType(), getGpuTaskSpeedName(taskSpeed), task->getName());
+					l->addTaskLogEntry(task.getResourcePtrHolder(), task->getResourceType(), getGpuTaskSpeedName(taskSpeed), task->getName());
 					runningTasksTable = l->getCurrentlRunningTasksTableString();
 #endif
 					unlock();
 					task->run();
 					lock();
 #ifdef _UNI_LIB_DEBUG
-					l->removeTaskLogEntry((HASH)task.getResourcePtrHolder());
+					l->removeTaskLogEntry(task.getResourcePtrHolder());
 					SpeedLog.writeToLog("%s used on %s by Task: %s of: %s",
 						timer.string().data(), getGpuTaskSpeedName(taskSpeed), task->getResourceType(), task->getName());
 #endif
@@ -166,11 +166,11 @@ namespace UniLib {
 				for(std::list<GPURenderCall*>::iterator it = mGPURenderCommands[i].begin(); it != mGPURenderCommands[i].end(); it++) {
 					Uint32 ticks = SDL_GetTicks();
 #ifdef _UNI_LIB_DEBUG
-					l->addTaskLogEntry(1, getGPUCommandTypeString((GPUSchedulerCommandType)i), "GPU Render Call", (*it)->getName());
+					l->addTaskLogEntry((void*)1, getGPUCommandTypeString((GPUSchedulerCommandType)i), "GPU Render Call", (*it)->getName());
 #endif 
 					DRReturn result = (*it)->render(secondsSinceLastFrame);
 #ifdef _UNI_LIB_DEBUG
-					l->removeTaskLogEntry(1);
+					l->removeTaskLogEntry((void*)1);
 #endif
 					Uint32 diff = SDL_GetTicks()-ticks;
 					if(result) {

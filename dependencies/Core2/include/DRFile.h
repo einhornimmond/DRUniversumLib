@@ -32,7 +32,7 @@ Zum laden, speichern und erstellen von Datein
 
 
 //Fehlercodes
-enum DRFileErrorCodes
+enum CORE2_API DRFileErrorCodes
 {
 	File_OK = 0,
 	File_error_cannot_create_File = 1,

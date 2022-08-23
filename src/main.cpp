@@ -9,8 +9,6 @@
 int         g_iProzess = 0;
 int			g_iProzessFunk = 0;
 UniLib::controller::BindToRenderer* UniLib::g_RenderBinder = NULL;
-
-UniLib::controller::BindToRenderer* UniLib::g_RenderBinder = NULL;
 UniLib::controller::CPUSheduler* UniLib::g_HarddiskScheduler = NULL;
 
 #ifdef _WIN32

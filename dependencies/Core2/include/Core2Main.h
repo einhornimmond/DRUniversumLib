@@ -143,7 +143,8 @@ enum /*CORE_API*/ DRReturn
 //ß = \303\237
 
 // core includes (ohne log)
- #include "DRVector2i.h"
+#include "DRBaseExceptions.h"
+#include "DRVector2i.h"
 #include "DRVector2.h"
 #include "DRVector3i.h"
 #include "DRVector3.h"

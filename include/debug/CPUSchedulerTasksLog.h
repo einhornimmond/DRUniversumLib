@@ -23,11 +23,13 @@
 
 #ifndef __UNI_LIB_DEBUG_CPU_SCHEDULER_TASKS_LOG_H
 #define __UNI_LIB_DEBUG_CPU_SCHEDULER_TASKS_LOG_H
+
 #include "lib/Singleton.h"
 #include "lib/MultithreadContainer.h"
 #ifdef _UNI_LIB_DEBUG
 namespace UniLib {
 	namespace debug {
+
 		class UNIVERSUM_LIB_API CPUShedulerTasksLog : public lib::Singleton, public lib::MultithreadContainer
 		{
 		public:
@@ -41,8 +43,9 @@ namespace UniLib {
 			DRReturn init();
 			void exit();
 
-			void addTaskLogEntry(HASH id, const char* resourcesTypeName, const char* threadName, const char* name = NULL);
-			void removeTaskLogEntry(HASH id);
+			//! \param ressourcePointer use pointer as id because the pointer should be already unique and don't change for task
+			void addTaskLogEntry(void* ressourcePointer, const char* resourcesTypeName, const char* threadName, const char* name = NULL);
+			void removeTaskLogEntry(void* id);
 
 			void printCurrentlyRunningTasks();
 			std::string getCurrentlRunningTasksTableString();
@@ -54,15 +57,15 @@ namespace UniLib {
 			bool mInitialized;
 
 			struct TaskLogEntry {
-				TaskLogEntry(HASH id, const char* typeName, const char* threadName, const char* name)
+				TaskLogEntry(void* id, const char* typeName, const char* threadName, const char* name)
 					: resourceTypeName(typeName), name(name), threadName(threadName) {}
 				std::string resourceTypeName;
 				std::string name;
 				std::string threadName;
-				HASH id;
+				void* id;
 			};
-			typedef std::map<HASH, TaskLogEntry*> TaskLogEntryMap;
-			typedef std::pair<HASH, TaskLogEntry*> TaskLogEntryPair;
+			typedef std::map<void*, TaskLogEntry*> TaskLogEntryMap;
+			typedef std::pair<void*, TaskLogEntry*> TaskLogEntryPair;
 			TaskLogEntryMap mTaskLogEntrys;
 
 		};

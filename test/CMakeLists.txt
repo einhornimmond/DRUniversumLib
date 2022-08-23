@@ -1,5 +1,3 @@
-#Etext (Engine Test)
-cmake_minimum_required(VERSION 2.6)
 
 FILE(GLOB SRC "*.cpp")
 FILE(GLOB HEADER "include/*.h")
