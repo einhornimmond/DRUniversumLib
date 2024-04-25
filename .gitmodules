@@ -4,3 +4,9 @@
 [submodule "dependencies/Core2/include/veclib"]
 	path = dependencies/Core2/include/veclib
 	url = https://github.com/nadult/veclib.git
+[submodule "dependencies/SDL"]
+	path = dependencies/SDL
+	url = https://github.com/libsdl-org/SDL
+[submodule "dependencies/rapidjson"]
+	path = dependencies/rapidjson
+	url = https://github.com/Tencent/rapidjson
