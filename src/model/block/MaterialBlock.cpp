@@ -1,4 +1,4 @@
-#include "model/block/MaterialBlock.h"
+#include "UniversumLib/model/block/MaterialBlock.h"
 
 namespace UniLib {
 	namespace model {
@@ -16,7 +16,7 @@ namespace UniLib {
 
 			DRReturn MaterialBlock::initFromJson(const Json::Value& json)
 			{
-				lock();
+				UNIQUE_LOCK;
 				if(mLoadingState == LOADING_STATE_EMPTY) {
 					std::string baseType = json.get("base_type", "solid").asString();
 					mBaseType = getBlockBaseTypeEnum(baseType);
@@ -31,7 +31,6 @@ namespace UniLib {
 
 					//EngineLog.writeToLog("[MaterialBlock::initFromJson] adding block: %s", asString().data());
 				}
-				unlock();
 
 				return DR_OK;
 			}

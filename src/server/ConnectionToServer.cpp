@@ -1,8 +1,8 @@
 #include "server/ConnectionToServer.h"
-#include "server/SektorConnectionManager.h"
+#include "server/SectorConnectionManager.h"
 #include "lib/Crypto.h"
 #include "lib/DRINetwork.h"
-#include "model/SektorID.h"
+#include "model/SectorID.h"
 #include "lib/CommandEventManager.h"
 
 namespace UniLib {

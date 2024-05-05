@@ -1,5 +1,5 @@
 #include "server/ConnectionToAccountServer.h"
-#include "server/SektorConnectionManager.h"
+#include "server/SectorConnectionManager.h"
 #include "controller/NetworkTask.h"
 #include "lib/Crypto.h"
 #include "lib/CommandEventManager.h"
@@ -109,7 +109,7 @@ namespace UniLib {
 			DRReturn result = ConnectionToServer::init();
 			if(result) LOG_ERROR("Error by initing parent class", DR_ERROR);
 
-			//DRNetRequest* netRequest = SektorConnectionManager::getInstance()->getFreeNetRequest();
+			//DRNetRequest* netRequest = SectorConnectionManager::getInstance()->getFreeNetRequest();
 			return DR_OK;
 		}
 		void ConnectionToAccountServer::login(const char* username, const char* password)

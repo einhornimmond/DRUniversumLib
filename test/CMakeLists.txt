@@ -18,9 +18,9 @@ endif(MSVC)
 
 
 if(WIN32)
-SET(LIBS DRCore2 DRUniversumLib)
+SET(LIBS DRCore2 UniversumLib)
 else(UNIX)
-SET(LIBS DRCore2 DRUniversumLib)
+SET(LIBS DRCore2 UniversumLib)
 endif(WIN32)
 
 ADD_EXECUTABLE(Test ${COMPLETE_SRC})

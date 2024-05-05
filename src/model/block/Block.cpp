@@ -1,6 +1,6 @@
-#include "model/block/Block.h"
-#include "model/block/BlockType.h"
-#include "controller/BlockTypeManager.h"
+#include "UniversumLib/model/block/Block.h"
+#include "UniversumLib/model/block/BlockType.h"
+#include "UniversumLib/controller/BlockTypeManager.h"
 
 namespace UniLib {
 	namespace model {

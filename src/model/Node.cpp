@@ -1,4 +1,4 @@
-#include "model/Node.h"
+#include "UniversumLib/model/Node.h"
 
 namespace UniLib {
 	namespace model {

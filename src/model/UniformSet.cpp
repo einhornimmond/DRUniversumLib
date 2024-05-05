@@ -1,4 +1,8 @@
-#include "model/UniformSet.h"
+#include "UniversumLib/model/UniformSet.h"
+
+#include "DRCore2/Foundation/DRHash.h"
+
+#include <cassert>
 
 namespace UniLib
 {
@@ -16,7 +20,8 @@ namespace UniLib
             }
             mUniformEntrys.clear();
         }
-
+		// inlined
+		/*
         DRReturn UniformSet::setUniform(const char* name, int value)
         {
             return setUniform(&value, 1, name, false);
@@ -49,55 +54,46 @@ namespace UniLib
 		{
 			return setUniform(value.n, 16, name, true);
 		}
-
+		*/
 		DRMatrix UniformSet::getUniformMatrix(const char* name)
 		{
-			lock();
-			DRMatrix matrix((float*)getUniform(name, 16));
-			unlock();
-			return matrix;
+			UNIQUE_LOCK;
+			return (float*)getUniform(name, 16);
 		}
 
 		DRReturn UniformSet::addUniformMapping(const char* name, void* location, HASH programID)
 		{
-			lock();
+			UNIQUE_LOCK;
 			UniformEntry* entry = getUniformEntry(name);
 			if(entry) {
 				entry->addLocation(location, programID);
-				unlock();
 				return DR_OK;
 			}
-			unlock();
 			return DR_ERROR;
 		}
 		DRReturn UniformSet::removeUniformMapping(const char* name, HASH programID)
 		{
-			lock();
+			UNIQUE_LOCK;
 			UniformEntry* entry = getUniformEntry(name);
 			if(entry) {
 				entry->removeLocation(programID);
-				unlock();
 				return DR_OK;
 			}
-			unlock();
 			return DR_ERROR;
 		}
 		void UniformSet::updateDirtyFlags()
 		{
-			lock();
+			UNIQUE_LOCK;
 			if(!mDirtyFlag) {
-				unlock();
 				return;
 			}
 			for(std::map<HASH, UniformEntry*>::iterator it = mUniformEntrys.begin(); it != mUniformEntrys.end(); it++) {
 				it->second->checkDirty();
-				if(it->second->isDirty()) {
-					unlock(); 
+				if(it->second->isDirty()) { 
 					return;
 				}
 			}
 			mDirtyFlag = false;
-			unlock();
 		}
         // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         // PROTECTED AREA
@@ -159,12 +155,11 @@ namespace UniLib
         //DRReturn UniformSet::setUniform(UniformEntry* newUniform)
         {
             if(!data) return DR_ZERO_POINTER;
-			lock();
+			UNIQUE_LOCK;
 			mDirtyFlag = true;
 			UniformEntry* entry = getUniformEntry(name);
             if(entry) {
                 DRReturn result = entry->update(data, arrayEntryCount, name);
-				unlock();
                 return result;
             } else {
 				HASH hash = DRMakeStringHash(name);
@@ -172,7 +167,6 @@ namespace UniLib
 				else entry = new UniformEntry((int*)data, arrayEntryCount, name);
                 mUniformEntrys.insert(UNIFORM_ENTRY_PAIR(hash, entry));
             }
-            unlock();
             return DR_OK;
         }
 

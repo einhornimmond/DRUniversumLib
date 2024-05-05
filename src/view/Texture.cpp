@@ -1,23 +1,11 @@
-#include "view/Texture.h"
-#include "model/Texture.h"
-#include "controller/Command.h"
-//#include "controller/CPUSheduler.h"
+#include "UniversumLib/view/Texture.h"
+#include "UniversumLib/exception/Loadable.h"
 
 namespace UniLib {
 	namespace view {
 
 		// ********************************************************************
-		// tasks
-		DRReturn TextureLoadingTask::run()
-		{
-			model::Texture* m = mViewTexture->getTextureModel();
-			if (m->loadFromFile(mViewTexture->getFilename().data())) {
-				LOG_ERROR("error loading texture", DR_ERROR);
-			}
-			mViewTexture->setLoadingState(LOADING_STATE_PARTLY_LOADED);
-			return DR_OK;
-		}
-
+		
 		DRReturn TextureGetPixelTask::run()
 		{
 			return DR_OK;
@@ -54,7 +42,7 @@ namespace UniLib {
 		{
 			if (textureName) {
 				mTextureName = textureName;
-				mLoadingState = LOADING_STATE_HAS_INFORMATIONS;
+				setLoadingState(LoadingStateType::HAS_INFORMATIONS);
 			}
 		}
 
@@ -62,24 +50,11 @@ namespace UniLib {
 			: mTextureModel(new model::Texture(size, format))
 		{
 			mId = mTextureModel->getHash();
-			mLoadingState = LOADING_STATE_HAS_INFORMATIONS;
+			setLoadingState(LoadingStateType::HAS_INFORMATIONS);
 		}
 
 		Texture::~Texture()
 		{
-			DR_SAVE_DELETE(mTextureModel);
-		}
-
-		void Texture::loadFromFile()
-		{
-			if (!mTextureModel) mTextureModel = new model::Texture();
-			TextureLoadingTask* tl = new TextureLoadingTask(this, controller::TextureManager::getInstance()->getTextureCPUScheduler());
-#ifdef _UNI_LIB_DEBUG
-			tl->setName(mTextureName.data());
-#endif
-			controller::TaskPtr task(tl);
-			task->scheduleTask(task);
-			//((controller::CPUTask*)(task.getResourcePtrHolder()->mResource))->start(task);
 		}
 
 		void Texture::saveIntoFile(const char* filename)
@@ -120,14 +95,41 @@ namespace UniLib {
 			savingTaskPtr->scheduleTask(savingTaskPtr);
 			return DR_OK;
 		}
-		void Texture::setLoadingState(LoadingState state)
+
+		LoadingStateType Texture::detectLoadingState()
 		{
-			MultithreadResource::setLoadingState(state);
-			if (state == LOADING_STATE_PARTLY_LOADED) {
-				// file loaded, now we can upload to GPU
-				uploadToGPU();
+			if (uploadedToGPU()) {
+				return LoadingStateType::FULLY_LOADED;
 			}
+			if (mTextureModel && mTextureModel->hasImageData()) {
+				return LoadingStateType::CPU_DATA_READY;
+			}
+			if (!mTextureModel && mTextureName.empty()) {
+				return LoadingStateType::EMPTY;
+			}
+
+			return LoadingStateType::HAS_INFORMATIONS;
 			
+		}
+
+		DRReturn Texture::load(LoadingStateType target)
+		{
+			auto state = checkLoadingState();
+			if (target == LoadingStateType::STORAGE_DATA_READY || target == LoadingStateType::CPU_DATA_READY)
+			{
+				if (state != LoadingStateType::HAS_INFORMATIONS) {
+					throw exception::LoadableInvalidLoadOrder("wrong loading state for loading texture from storage", state, target);
+				}
+				return mTextureModel->loadFromFile(mTextureName.data());
+			}
+			if (target == LoadingStateType::GPU_DATA_READY) {
+				if (state != LoadingStateType::CPU_DATA_READY) {
+					throw exception::LoadableInvalidLoadOrder("wrong loading state for upload texture to gpu", state, target);
+				}
+				uploadToGPU();
+				return DR_OK;
+			}
+			return DR_ERROR;
 		}
 	}
 }

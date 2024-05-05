@@ -1,12 +1,12 @@
-#include "generator/RenderToTexture.h"
-#include "view/Geometrie.h"
-#include "view/Material.h"
-#include "view/FrameBuffer.h"
-#include "view/Texture.h"
-#include "controller/BaseGeometrieManager.h"
-#include "controller/BindToRenderer.h"
-#include "model/UniformSet.h"
-#include "model/ShaderProgram.h"
+#include "UniversumLib/generator/RenderToTexture.h"
+#include "UniversumLib/view/Geometrie.h"
+#include "UniversumLib/view/Material.h"
+#include "UniversumLib/view/FrameBuffer.h"
+#include "UniversumLib/view/Texture.h"
+#include "UniversumLib/manager/BaseGeometries.h"
+#include "UniversumLib/controller/BindToRenderer.h"
+#include "UniversumLib/model/UniformSet.h"
+#include "UniversumLib/model/ShaderProgram.h"
 
 namespace UniLib {
 	namespace generator {
@@ -28,11 +28,11 @@ namespace UniLib {
 		bool RenderToTexture::isReady()
 		{
 			view::Geometrie* geo = nullptr;
-			if (mGeometrie.getResourcePtrHolder()) {
-				geo = mGeometrie;
+			if (mGeometrie) {
+				geo = mGeometrie.get();
 			}
 			if (!geo) {
-				geo = controller::BaseGeometrieManager::getInstance()->getGeometrie(controller::BASE_GEOMETRIE_PLANE);
+				geo = manager::BaseGeometries::getInstance()->getGeometrie(controller::BASE_GEOMETRIE_PLANE);
 			}
 #ifdef _UNI_LIB_DEBUG
 			bool geoReady = geo->isReady();

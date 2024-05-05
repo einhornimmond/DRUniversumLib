@@ -1,15 +1,19 @@
-﻿#include "UniversumLib.h"
+﻿#include "UniversumLib/UniversumLib.h"
+#include "UniversumLib/controller/BindToRenderer.h"
 
-#include "controller/BindToRenderer.h"
-#include "controller/CPUSheduler.h"
+#include "DRCore2/DRCore2Main.h"
+#include "DRCore2/Manager/DRFileManager.h"
+#include "DRCore2/Threading/DRMultithreadLogger.h"
 
 #include "rapidjson/error/en.h"
 
 // some dll stuff for windows
 int         g_iProzess = 0;
 int			g_iProzessFunk = 0;
-UniLib::controller::BindToRenderer* UniLib::g_RenderBinder = NULL;
-UniLib::controller::CPUSheduler* UniLib::g_HarddiskScheduler = NULL;
+namespace UniLib {
+	controller::BindToRenderer* g_RenderBinder = NULL;
+	DRCPUScheduler* g_StorageScheduler = NULL;
+}
 
 #ifdef _WIN32
 //DLL Main Funktion
@@ -49,44 +53,21 @@ int WINAPI DllMain(HINSTANCE DllHandle, unsigned long ReasonForCall, void* Reser
 
 namespace UniLib {
     using namespace lib;
-    EngineLogger EngineLog;
-	EngineLogger SpeedLog;
-	LARGE_INTEGER g_QueryPerformanceFreq;
 
     DRReturn init(int numberParallelStorageOperations/* = 1*/)
     {
 		SDL_Init(SDL_INIT_TIMER);
         Core2_init("Logger.html");
-        EngineLog.init("EngineLogger.html", true);        
-		SpeedLog.init("SpeedLogger.html", false);
-		g_HarddiskScheduler = new controller::CPUSheduler(numberParallelStorageOperations, "ioThrd");
-#ifdef _WINDOWS_
-		if (!QueryPerformanceFrequency(&g_QueryPerformanceFreq)) {
-			LOG_WARNING("Error obtaining query performance frequency");
-		}
-#endif // _WINDOWS_
+        
+		g_StorageScheduler = new DRCPUScheduler(numberParallelStorageOperations, "ioThrd");
         return DR_OK;
     }
 
     void exit() 
     {
-		DR_SAVE_DELETE(g_HarddiskScheduler);
+		DR_SAVE_DELETE(g_StorageScheduler);
 		SDL_Quit();
-        EngineLog.exit();
-		SpeedLog.exit();
         Core2_exit();
-    }
-
-    DRString getTimeSinceStart()
-    {
-        char timeBuffer[256];
-        double seconds = static_cast<double>(SDL_GetTicks())/1000.0;
-        double minutes = 0.0;
-        seconds = modf(seconds/60.0, &minutes);
-        seconds *= 60.0; 
-        sprintf(timeBuffer, "[%.0f:%02.0f] ", minutes, seconds);
-
-        return DRString(timeBuffer);
     }
 
 	std::string readFileAsString(std::string filename)
@@ -117,16 +98,6 @@ namespace UniLib {
 		return result;
 	}
 
-	Json::Value convertStringToJson(std::string jsonString)
-	{
-		Json::Reader read;
-		Json::Value result;
-		if(!read.parse(jsonString, result)) {
-			LOG_ERROR(read.getFormattedErrorMessages().data(), Json::Value(Json::objectValue));
-		}
-		return result;
-	}
-
 	rapidjson::Document convertStringToRapidJson(std::string jsonString)
 	{
 		rapidjson::Document d;
@@ -137,43 +108,9 @@ namespace UniLib {
 		return d;
 	}
 
-    DRString getValueAsBinaryString(u8 zahl)
-    {
-        char buffer[9];memset(buffer, 0, 9);
-        for(int i = 0; i < 8; i++) {
-            u8 compareZahl = (u8)pow(2.0, i);
-            if((compareZahl & zahl) == compareZahl) {
-                buffer[i] = '1';
-            } else {
-                buffer[i] = '0';
-            }
-        }
-        return DRString(buffer);
-    }
-
-	DRString getValueAsBinaryString(int zahl)
-	{
-		u8 z1 = zahl & 0x000000ff;
-		u8 z2 = (zahl & 0x0000ff00) >> 8;
-		u8 z3 = (zahl & 0x00ff0000) >> 16;
-		u8 z4 = (zahl & 0xff000000) >> 24;
-		//printf("%d %d %d %d\n", z1, z2, z3, z4);
-		return getValueAsBinaryString(z1) + getValueAsBinaryString(z2) + getValueAsBinaryString(z3) + getValueAsBinaryString(z4);
-
-	}
 	void setBindToRenderer(controller::BindToRenderer* bindToRender)
 	{
 		g_RenderBinder = bindToRender;
 	}
 
-	const char* getGpuTaskSpeedName(GPUTaskSpeed speed)
-	{
-		switch (speed) {
-		case GPU_TASK_SLOW: return "GPU Slow";
-		case GPU_TASK_FAST: return "GPU Fast";
-		case GPU_TASK_LOAD: return "GPU Load";
-		default: return "unknown";
-		}
-		return "";
-	}
 }

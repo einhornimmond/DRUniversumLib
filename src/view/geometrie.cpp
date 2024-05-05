@@ -1,16 +1,18 @@
-#include "view/Geometrie.h"
-#include "model/geometrie/BaseGeometrie.h"
+#include "UniversumLib/view/Geometrie.h"
+#include "UniversumLib/model/geometrie/BaseGeometrie.h"
 
 namespace UniLib {
 	namespace view {
 
-		DRReturn GeometrieUploadToGpuTask::run() 
-		{
-			return mGeo->uploadToGPU();
-		}
+		
 
 		Geometrie::Geometrie(model::geometrie::BaseGeometriePtr baseGeometrie)
-			: mGeometrieModel(baseGeometrie)
+			: lib::Loadable(LoadingStateType::HAS_INFORMATIONS), mGeometrieModel(baseGeometrie)
+		{
+
+		}
+
+		Geometrie::Geometrie()
 		{
 
 		}

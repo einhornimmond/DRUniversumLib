@@ -1,23 +1,22 @@
-#include "controller/InputControls.h"
-#include "controller/InputCommand.h"
+#include "UniversumLib/controller/InputControls.h"
+#include "UniversumLib/controller/InputCommand.h"
+
+#include "SDL_events.h"
+
+#include <cassert>
 
 namespace UniLib {
 	namespace controller {
 
-		InputControls* InputControls::mpInstanz = NULL;
+		InputControls* InputControls::mpInstanz = nullptr;
 
 		InputControls::InputControls()
-			: mMouseMoveBuffer(0), mSDLWorkMutex(SDL_CreateMutex()), mLastKeyStates(NULL), mLastKeyStatesSize(0)
+			: mMouseMoveBuffer(0), mLastKeyStates(nullptr), mLastKeyStatesSize(0)
 		{
-			if(!mSDLWorkMutex) LOG_WARNING_SDL();
 		}
 
 		InputControls::~InputControls()
 		{
-			lock();
-			unlock();
-			SDL_DestroyMutex(mSDLWorkMutex);
-			mSDLWorkMutex = NULL;
 		}
 
 		InputControls* InputControls::getInstance()
@@ -31,18 +30,16 @@ namespace UniLib {
 		bool InputControls::isKeyPressed(SDL_Keycode whichKey) 
 		{
 			int keyCount = 0;
-			lock();
+			std::unique_lock _lock(mWorkMutex);
 			assert(whichKey > 0 && whichKey < mLastKeyStatesSize);
-			bool result = mLastKeyStates[whichKey] == 1;
-			unlock();
-			return result;
+			return mLastKeyStates[whichKey] == 1;
 		}
-		bool InputControls::isKeyPressed(InputCommandEnum whichKey) 
+		bool InputControls::isKeyPressed(InputCommandType whichKey)
 		{
 			return isKeyPressed(getKeyCodeForCommand(whichKey));
 		}
 		
-		void InputControls::setMapping(SDL_Keycode sdlKeycode, InputCommandEnum command)
+		void InputControls::setMapping(SDL_Keycode sdlKeycode, InputCommandType command)
 		{
 			CommandMappingIterator it = mCommandMapping.find(command);
 			if(it != mCommandMapping.end()) {
@@ -58,7 +55,7 @@ namespace UniLib {
 			}
 		}
 		
-		SDL_Keycode InputControls::getKeyCodeForCommand(InputCommandEnum command)
+		SDL_Keycode InputControls::getKeyCodeForCommand(InputCommandType command)
 		{
 			CommandMappingIterator it = mCommandMapping.find(command);
 			if(it != mCommandMapping.end()) {
@@ -68,13 +65,13 @@ namespace UniLib {
 		}
 		
 
-		InputCommandEnum InputControls::getCommandForKeycode(SDL_Keycode sdlKeycode)
+		InputCommandType InputControls::getCommandForKeycode(SDL_Keycode sdlKeycode)
 		{
 			KeycodeMappingIterator it = mKeycodeMapping.find(sdlKeycode);
 			if(it != mKeycodeMapping.end()) {
 				return it->second;
 			} 
-			return INPUT_UNKNOWN;
+			return InputCommandType::UNKNOWN;
 		}
 		
 		void InputControls::addingInputCommand(InputCommand* cmd)
@@ -94,8 +91,8 @@ namespace UniLib {
 
 			/* Poll for events */
 			while( SDL_PollEvent( &event ) ){
-				InputCommandEnum in = getCommandForKeycode(event.type);
-				if(in != INPUT_UNKNOWN) {
+				InputCommandType in = getCommandForKeycode(event.type);
+				if(in != InputCommandType::UNKNOWN) {
 					for(std::list<InputCommand*>::iterator it = mInputCommands.begin(); it != mInputCommands.end(); it++) 
 					{
 						if((*it)->input(in)) it = mInputCommands.erase(it);
@@ -105,14 +102,13 @@ namespace UniLib {
 			// copy current keyboard key state for access from other threads
 			int keyCount = 0;
 			const Uint8 *keys = SDL_GetKeyboardState(&keyCount);
-			lock();
+			std::unique_lock _lock(mWorkMutex);
 			if(keyCount != mLastKeyStatesSize) {
 				mLastKeyStatesSize = keyCount;
 				DR_SAVE_DELETE_ARRAY(mLastKeyStates);
 				mLastKeyStates = new Uint8[mLastKeyStatesSize];
 			}
 			memcpy(mLastKeyStates, keys, sizeof(Uint8)* keyCount);
-			unlock();
 			return DR_OK;
 		}
 	}

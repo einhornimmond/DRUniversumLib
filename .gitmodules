@@ -1,12 +1,15 @@
-[submodule "dependencies/jsoncpp"]
-	path = dependencies/jsoncpp
-	url = https://github.com/codebudo/jsoncpp.git
-[submodule "dependencies/Core2/include/veclib"]
-	path = dependencies/Core2/include/veclib
-	url = https://github.com/nadult/veclib.git
 [submodule "dependencies/SDL"]
 	path = dependencies/SDL
 	url = https://github.com/libsdl-org/SDL
 [submodule "dependencies/rapidjson"]
 	path = dependencies/rapidjson
 	url = https://github.com/Tencent/rapidjson
+[submodule "dependencies/DRCore2"]
+	path = dependencies/DRCore2
+	url = git@github.com:einhornimmond/DRCore2.git
+[submodule "dependencies/stb"]
+	path = dependencies/stb
+	url = https://github.com/nothings/stb.git
+[submodule "dependencies/magic_enum"]
+	path = dependencies/magic_enum
+	url = https://github.com/Neargye/magic_enum.git
