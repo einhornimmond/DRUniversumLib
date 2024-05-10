@@ -3,6 +3,9 @@
 #include "DRCore2/DRCore2Main.h"
 
 #include "magic_enum/magic_enum.hpp"
+#include "magic_enum/magic_enum_flags.hpp"
+
+using namespace magic_enum::bitwise_operators;
 
 namespace UniLib {
 	namespace model {
@@ -53,11 +56,8 @@ namespace UniLib {
 				deleteFastAccessStructures();
 				int vertexCount = 0;
 				for(GeometrieDataMapIterator it = mGeometrieDataMap.begin(); it != mGeometrieDataMap.end(); it++) {
-					// combine flags, casting with magic_enum
-					mVertexFormatFlags = magic_enum::enum_cast<GeometrieDataType>(
-						magic_enum::enum_integer(mVertexFormatFlags) 
-						| magic_enum::enum_integer(it->second->getType())
-					).value();
+					// combine flags
+					mVertexFormatFlags |= it->second->getType();
 					mVertexSize += it->second->getTypeSize();
 					if(!vertexCount)
 						vertexCount = it->second->getVertexCount();
@@ -121,7 +121,7 @@ namespace UniLib {
 			DRVector3 BaseGeometrie::GeometriePartVector::getVector3 (int index)
 			{
 				assert(
-					magic_enum::enum_integer(mType) & magic_enum::enum_integer(GeometrieDataType::VECTOR3D)
+					magic_enum::enum_integer(mType & GeometrieDataType::VECTOR3D)
 					&& index < mRawData.size()*3
 				);
 				return DRVector3(&mRawData[index*3]);
@@ -130,7 +130,7 @@ namespace UniLib {
 			DRVector2 BaseGeometrie::GeometriePartVector::getVector2(int index)
 			{
 				assert(
-					magic_enum::enum_integer(mType) & magic_enum::enum_integer(GeometrieDataType::VECTOR2D)
+					magic_enum::enum_integer(mType & GeometrieDataType::VECTOR2D)
 					&& index < mRawData.size()*2
 				);
 				return DRVector2(&mRawData[index*2]);
@@ -139,24 +139,24 @@ namespace UniLib {
 			DRColor BaseGeometrie::GeometriePartVector::getColor(int index)
 			{
 				assert(
-					magic_enum::enum_integer(mType) & magic_enum::enum_integer(GeometrieDataType::VECTOR4D) 
+					magic_enum::enum_integer(mType & GeometrieDataType::VECTOR4D)
 					&& index < mRawData.size()*4);
 				return DRColor(&mRawData[index*4]);
 			}
 
 			void BaseGeometrie::GeometriePartVector::addVector(DRVector2 v2)
 			{
-				assert(magic_enum::enum_integer(mType) & magic_enum::enum_integer(GeometrieDataType::VECTOR2D));
+				assert(magic_enum::enum_integer(mType & GeometrieDataType::VECTOR2D));
 				addFloats(v2.c, 2);
 			}
 			void BaseGeometrie::GeometriePartVector::addVector(DRVector3 v3)
 			{
-				assert(magic_enum::enum_integer(mType) & magic_enum::enum_integer(GeometrieDataType::VECTOR3D));
+				assert(magic_enum::enum_integer(mType & GeometrieDataType::VECTOR3D));
 				addFloats(v3.c, 3);
 			}
 			void BaseGeometrie::GeometriePartVector::addVector(DRColor c)
 			{
-				assert(magic_enum::enum_integer(mType) & magic_enum::enum_integer(GeometrieDataType::VECTOR4D));
+				assert(magic_enum::enum_integer(mType & GeometrieDataType::VECTOR4D));
 				addFloats(c, 4);
 			}
 			void BaseGeometrie::GeometriePartVector::addFloats(float* c, int count)
@@ -167,9 +167,9 @@ namespace UniLib {
 
 			int BaseGeometrie::GeometriePartVector::getTypeSize()
 			{
-				if(magic_enum::enum_integer(mType) & magic_enum::enum_integer(GeometrieDataType::VECTOR2D)) return 2;
-				if(magic_enum::enum_integer(mType) & magic_enum::enum_integer(GeometrieDataType::VECTOR3D)) return 3;
-				if(magic_enum::enum_integer(mType) & magic_enum::enum_integer(GeometrieDataType::VECTOR4D)) return 4;
+				if(magic_enum::enum_integer(mType & GeometrieDataType::VECTOR2D)) return 2;
+				if(magic_enum::enum_integer(mType & GeometrieDataType::VECTOR3D)) return 3;
+				if(magic_enum::enum_integer(mType & GeometrieDataType::VECTOR4D)) return 4;
 				return 0;
 			}
 

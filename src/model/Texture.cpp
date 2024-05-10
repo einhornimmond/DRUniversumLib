@@ -72,6 +72,7 @@ namespace UniLib {
 
 		DRReturn Texture::loadFromMemory(u8* data, const DRVector2i& size, GLenum format)
 		{
+			clearMemory();
 			UNIQUE_LOCK;
 			mSize = size;
 			mFormat = format;

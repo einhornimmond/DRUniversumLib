@@ -34,72 +34,77 @@
 #ifndef __DR_UNIVERSUM_LIN_CONTROLLER_TEXTURE_MANAGER_H
 #define __DR_UNIVERSUM_LIN_CONTROLLER_TEXTURE_MANAGER_H
 
-#include "lib/Singleton.h"
-#include "lib/Thread.h"
+#include "UniversumLib/UniversumLib.h"
+#include "DRCore2/DRTypes.h"
+#include "DRCore2/Foundation/DRVector2i.h"
+#include "DRCore2/Threading/DRFuzzyTimer.h"
+#include "DRCore2/Threading/DRMultithreadContainer.h"
+
+#include <memory>
+#include <map>
+
+using namespace std::chrono_literals;
+#define TEXTURE_MANAGER_TIMER_NAME "TextureManager"
 
 namespace UniLib {
-	namespace lib {
-		class MultithreadContainer;
-		class Timer;
-	}
+
 	namespace view {
 		class Texture;
-		typedef DRResourcePtr<Texture> TexturePtr;
+		typedef std::shared_ptr<Texture> TexturePtr;
 	}
 	namespace controller {
-		class CPUSheduler;
-		class UNIVERSUM_LIB_API TextureManager : public lib::Singleton
+		class UNIVERSUMLIB_EXPORT TextureManager: public DRTimerCallback, private DRMultithreadContainer
 		{
 		public:
 			static TextureManager* const getInstance();
 			inline static bool	isInitialized() { return getInstance()->mInitalized; };
 
 			//! \brief init 
-			//! \param defaultCPUSheduler CPUSheduler on which texture loading and saving take place
 			//! \param updateTimer timer on which to attach for updating texture storage
 			//! \param rerunDelay how much ms passes between update calls
-			DRReturn init(lib::Timer* updateTimer, Uint32 rerunDelay = 10000);
+			DRReturn init(DRFuzzyTimer* updateTimer, std::chrono::duration<u64, std::milli> rerunDelay = 10000ms);
 			void exit();
 
 			view::TexturePtr getTexture(const char* filename);
 	
 			//!	\param size 
-			//!	\param format allowed values: GL_RED, GL_RG, GL_RGB, GL_BGR, GL_RGBA, GL_BGRA, GL_RED_INTEGER, GL_RG_INTEGER, GL_RGB_INTEGER, GL_BGR_INTEGER, GL_RGBA_INTEGER, GL_BGRA_INTEGER, GL_STENCIL_INDEX, GL_DEPTH_COMPONENT, GL_DEPTH_STENCIL
+			//!	\param format allowed values: 
+			//!		GL_RED, GL_RG, GL_RGB, GL_BGR, GL_RGBA,
+			//!     GL_BGRA, GL_RED_INTEGER, GL_RG_INTEGER,
+			//!     GL_RGB_INTEGER, GL_BGR_INTEGER, GL_RGBA_INTEGER,
+			//!     GL_BGRA_INTEGER, GL_STENCIL_INDEX, GL_DEPTH_COMPONENT, GL_DEPTH_STENCIL
 			view::TexturePtr getEmptyTexture(DRVector2i size, GLenum format);
 			void giveBackEmptyTexture(view::TexturePtr tex);
 
 			// access
-			inline void setTimeoutForNotLongerUsedTextures(Uint32 timeout) { mTimeToLetEmptyTexturesInStorage = timeout; }
-			inline CPUSheduler* getTextureCPUScheduler() { return mTextureSheduler; }
+			inline void setTimeoutForNotLongerUsedTextures(std::chrono::duration<u32, std::milli> timeout) { mTimeToLetEmptyTexturesInStorage = timeout; }
+
+			const char* getTimerCallbackType() const { return "TextureManager"; };
+			// used to cleanup space for not longer used texture after timeout,
+			// called from fuzzy timmer
+			TimerReturn callFromTimer();
 
 		protected:
 			TextureManager();
 			TextureManager(const TextureManager&);
 			virtual ~TextureManager() { if (mInitalized) exit(); };
 
-
 			// member variables
 			bool mInitalized;
-			CPUSheduler* mTextureSheduler; 
-			
+			DRFuzzyTimer* mTimer;
 
-			// for updateing
-			class UpdateThread : public lib::TimingThread
-			{
-			public:
-				UpdateThread(Uint32 rerunDelay, lib::Timer* timerOnWhichToAttach)
-					: lib::TimingThread("TextureManager::Update", rerunDelay, timerOnWhichToAttach, "TexUpd") {}
-				virtual int ThreadFunction();
+			std::chrono::duration<u32, std::milli> mTimeToLetEmptyTexturesInStorage;
+
+			struct EmptyTexture {
+				view::TexturePtr texture;
+				std::chrono::time_point<std::chrono::steady_clock> timeout;
 			};
-
-			void update();
-			UpdateThread* mUpdateThread;
-			Uint32		  mTimeToLetEmptyTexturesInStorage;
 
 			// store existing textures
 			typedef std::pair<DHASH, view::TexturePtr> TextureEntry;
 			typedef std::map<DHASH, view::TexturePtr> TextureMap;
-			typedef std::multimap<DHASH, view::TexturePtr> TextureMultiMap;
+			typedef std::pair<DHASH, EmptyTexture> EmptyTextureEntry;
+			typedef std::multimap<DHASH, EmptyTexture> TextureMultiMap;
 			TextureMap mStoredTextures;
 			TextureMultiMap mEmptyTextures;
 		};

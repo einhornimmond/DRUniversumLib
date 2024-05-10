@@ -2,8 +2,11 @@
 #include "UniversumLib/task/Loadable.h"
 #include "UniversumLib/task/gpu/Loadable.h"
 #include "UniversumLib/exception/Task.h"
+#include "UniversumLib/exception/Loadable.h"
 
 #include "DRCore2/DRCore2Main.h"
+
+#include "magic_enum/magic_enum.hpp"
 
 using namespace std::chrono_literals;
 
@@ -23,15 +26,21 @@ namespace UniLib {
 			if (!mRunningLoadingTask.expired() && mRunningLoadingTask.use_count()) {
 				throw exception::TaskOrderException("a loading task is already running");
 			}
+			auto currentState = detectLoadingState();
+			if (target == currentState || target < currentState) {
+				DRLog.writeToLog("loading state: %s", magic_enum::enum_name(target).data());
+				LOG_WARNING("try to load state already reached");
+				return;
+			}
+
 			DRTaskPtr task;
-			switch (target) {
-			case LoadingStateType::STORAGE_DATA_READY: 
-			case LoadingStateType::CPU_DATA_READY:
+			if (LoadingStateType::STORAGE_DATA_READY == target || LoadingStateType::CPU_DATA_READY == target) {
 				task = std::make_shared<task::Loadable>(loadingScheduler, this, target);
-				break;
-			case LoadingStateType::GPU_DATA_READY: 
+			} else if (LoadingStateType::GPU_DATA_READY == target) {
 				task = std::make_shared<task::gpu::Loadable>(this);
-				break;
+			}
+			else {
+				throw exception::LoadableInvalidLoadOrder("unhandled target", currentState, target);
 			}
 			task->setFinishCommand(finishCallback);
 			task->scheduleTask(task);
