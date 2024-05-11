@@ -39,7 +39,7 @@ namespace UniLib {
 			class GeometrieBlock;
 		}
 	}
-	namespace controller {
+	namespace manager {
 		class InstancingBlockManager : public lib::Singleton
 		{
 		public:

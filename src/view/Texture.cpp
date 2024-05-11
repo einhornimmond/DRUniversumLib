@@ -28,6 +28,7 @@ namespace UniLib {
 
 		LoadingStateType Texture::detectLoadingState()
 		{
+			UNIQUE_LOCK;
 			if (uploadedToGPU()) {
 				return LoadingStateType::FULLY_LOADED;
 			}
@@ -44,6 +45,7 @@ namespace UniLib {
 
 		DRReturn Texture::load(LoadingStateType target)
 		{
+			UNIQUE_LOCK;
 			auto state = checkLoadingState();
 			if (state == LoadingStateType::FULLY_LOADED) {
 				LOG_WARNING("called load but it is already loaded!");

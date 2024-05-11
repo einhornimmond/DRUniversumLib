@@ -19,6 +19,18 @@ namespace UniLib {
 			LoadingStateType mTargetType;
 
 		};
+
+		class UNIVERSUMLIB_EXPORT LoadableTargetNotSupported : public UniversumLib
+		{
+		public:
+			explicit LoadableTargetNotSupported(const char* what, LoadingStateType target) noexcept
+				: UniversumLib(what), mTargetType(target) {}
+
+			virtual std::string toString();
+
+		protected:
+			LoadingStateType mTargetType;
+		};
 	}
 }
 

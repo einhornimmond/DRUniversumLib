@@ -9,6 +9,11 @@ namespace UniLib {
 				mParent->updateLoadingState();
 				return result;
 			}
+
+			bool Loadable::isReady()
+			{
+				return mParent->isReadyForLoad(LoadingStateType::GPU_DATA_READY);
+			}
 		}
 	}
 }

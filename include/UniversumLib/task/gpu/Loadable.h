@@ -22,6 +22,7 @@ namespace UniLib {
 				virtual ~Loadable();
 				virtual DRReturn run();
 				virtual const char* getResourceType() const { return "task::gpu::Loadable"; };
+				virtual bool isReady();
 			protected:
 				lib::Loadable* mParent;
 			};

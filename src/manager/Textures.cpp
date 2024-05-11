@@ -7,7 +7,7 @@
 #include "DRCore2/Foundation/DRHash.h"
 
 namespace UniLib {
-	namespace controller {
+	namespace manager {
 
 		TextureManager::TextureManager()
 			: mInitalized(false), mTimer(nullptr)

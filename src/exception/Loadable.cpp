@@ -14,5 +14,12 @@ namespace UniLib {
 			s << what() << ", current" << mCurrentType << ", target: " << mTargetType;
 			return s.str();
 		}
+
+		std::string LoadableTargetNotSupported::toString()
+		{
+			std::stringstream s;
+			s << what() << ", target: " << mTargetType;
+			return s.str();
+		}
 	}
 }

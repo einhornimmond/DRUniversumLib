@@ -52,7 +52,7 @@ namespace UniLib {
 		class Texture;
 		typedef std::shared_ptr<Texture> TexturePtr;
 	}
-	namespace controller {
+	namespace manager {
 		class UNIVERSUMLIB_EXPORT TextureManager: public DRTimerCallback, private DRMultithreadContainer
 		{
 		public:

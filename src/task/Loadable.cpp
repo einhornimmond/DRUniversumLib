@@ -9,5 +9,10 @@ namespace UniLib {
 			mParent->updateLoadingState();
 			return result;
 		}
+
+		bool Loadable::isReady()
+		{
+			return mParent->isReadyForLoad(mTargetLoadingState);
+		}
 	}
 }

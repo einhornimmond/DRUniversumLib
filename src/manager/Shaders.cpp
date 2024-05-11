@@ -1,9 +1,12 @@
-#include "controller/ShaderManager.h"
-#include "model/ShaderProgram.h"
-#include "controller/BindToRenderer.h"
+#include "Universumlib/manager/Shaders.h"
+#include "Universumlib/controller/BindToRenderer.h"
+#include "UniversumLib/exception/Hash.h"
+
+#include "DRCore2/DRCore2Main.h"
+#include "DRCore2/Foundation/DRHash.h"
 
 namespace UniLib {
-	namespace controller {
+	namespace manager {
 	using namespace model;
 
 	
@@ -26,8 +29,9 @@ namespace UniLib {
 			return &TheOneAndOnly;
 		}
 		
-		DRReturn ShaderManager::init()
+		DRReturn ShaderManager::init(const char* shaderBasePath)
 		{
+			mShaderBasePath = shaderBasePath;
 			mInitalized = true;
 			LOG_INFO("ShaderManager initalisiert");
 			return DR_OK;
@@ -45,39 +49,30 @@ namespace UniLib {
 		DHASH ShaderManager::makeShaderHash(const char* shaderProgramName)
 		{
 			DHASH hash = DRMakeStringHash(shaderProgramName);
-#ifdef _UNI_LIB_DEBUG
-			std::map<DHASH, DRString>::iterator it = mHashCollisionCheckMap.find(hash);
+#ifdef DEBUG
+			auto it = mHashCollisionCheckMap.find(hash);
 			if(it != mHashCollisionCheckMap.end()) {
 				if(std::string(shaderProgramName) != it->second) {
-					throw "Shader Hash collision";
+					throw exception::HashCollision("hash collision in ShaderManager", shaderProgramName, it->second.data());
 				}
 			} else {
-				mHashCollisionCheckMap.insert(HASH_SHADER_ENTRY(hash, DRString(shaderProgramName)));
+				mHashCollisionCheckMap.insert({ hash, std::string(shaderProgramName) });
 			}
 #endif
 			return hash;
 		}
 
-		model::ShaderProgramPtr ShaderManager::getShaderProgram(const char* shaderProgramName)
-		{
-			DHASH id = makeShaderHash(shaderProgramName);
-			return model::ShaderProgramPtr(getShaderProgram(id));
-		}
-
 		model::ShaderProgramPtr ShaderManager::getShaderProgram(DHASH id)
 		{
-			lock();
-			if(mShaderProgramEntrys.find(id) != mShaderProgramEntrys.end())
-			{
-				unlock();
+			UNIQUE_LOCK;
+			if(mShaderProgramEntrys.find(id) != mShaderProgramEntrys.end()) {
 				return mShaderProgramEntrys[id];
 			}
-			unlock();
 			return NULL;
 		}
 			
 		//!
-		ShaderProgramPtr ShaderManager::getShaderProgram(const char* shaderProgramName, const char* vertexShader, const char* fragmentShader)
+		ShaderProgramPtr ShaderManager::getShaderProgram(const char* shaderProgramName, const std::vector<model::ShaderInformation>& shaderInformations)
 		{
 			if(!mInitalized) return NULL;
 			if(!g_RenderBinder) LOG_ERROR("render binder is not set", NULL);
@@ -85,66 +80,49 @@ namespace UniLib {
 			//Schauen ob schon vorhanden
 			DHASH id = makeShaderHash(shaderProgramName);
 			ShaderProgramPtr exist = getShaderProgram(id);
-			if (exist.getResourcePtrHolder()) return exist;
+			if (exist) return exist;
 
-			ShaderProgramPtr shaderProgram(g_RenderBinder->newShaderProgram(shaderProgramName, id));
-			//shaderProgram->init(getShader(vertexShader, SHADER_VERTEX), getShader(fragmentShader, SHADER_FRAGMENT));
-			shaderProgram->addShader(vertexShader, SHADER_VERTEX);
-			shaderProgram->addShader(fragmentShader, SHADER_FRAGMENT);
-#ifdef _UNI_LIB_DEBUG
-			shaderProgram->checkIfBinaryExist(new LoadShaderCommand(shaderProgram, shaderProgramName));
-#else 
-			shaderProgram->checkIfBinaryExist(new LoadShaderCommand(shaderProgram));
-#endif
-			//*/
-			lock();
-			if(!mShaderProgramEntrys.insert(SHADER_PROGRAM_ENTRY(id, shaderProgram)).second)
-			{
-				unlock();
-				LOG_ERROR("Unerwarteter Fehler in ShaderManager::getShaderProgram aufgetreten", 0);
+			ShaderProgramPtr shaderProgram;
+			ShaderProgamBinaryPtr shaderProgramBinaryPtr(g_RenderBinder->newShaderProgamBinary(shaderProgramName));
+			if (shaderProgramBinaryPtr->isFileExist()) {
+				shaderProgramBinaryPtr->asyncLoad(LoadingStateType::STORAGE_DATA_READY);
+				shaderProgram = ShaderProgramPtr(g_RenderBinder->newShaderProgram(shaderProgramName, shaderProgramBinaryPtr, id));
+			} else {
+				std::vector<ShaderPtr> shaders;
+				shaders.reserve(shaderInformations.size());
+				for (auto info : shaderInformations) {
+					shaders.push_back(getShader(info));
+				}
+				ShaderProgramPtr shaderProgram(g_RenderBinder->newShaderProgram(shaderProgramName, std::move(shaders), id));
 			}
-			unlock();
+			shaderProgram->asyncLoad(LoadingStateType::GPU_DATA_READY);
+			
+			UNIQUE_LOCK;
+			if (!mShaderProgramEntrys.insert({ id, shaderProgram }).second) {
+				LOG_ERROR("Unerwarteter Fehler in ShaderManager::getShaderProgram aufgetreten", nullptr);
+			}
 			return shaderProgram;
-
 		}
 
-		ShaderPtr ShaderManager::getShader(const char* shaderName, ShaderType shaderType)
+		ShaderPtr ShaderManager::getShader(const model::ShaderInformation& shaderInfos)
 		{
 			if(!mInitalized) return NULL;
 			if(!g_RenderBinder) LOG_ERROR("render binder is not set", NULL);
 
-			DHASH id = DRMakeFilenameHash(shaderName);
+			DHASH id = makeShaderHash(shaderInfos.fileName.data());
 
 			//Schauen ob schon vorhanden
-			lock();
-			if(mShaderEntrys.find(id) != mShaderEntrys.end())
-			{
-				unlock();
+			UNIQUE_LOCK;
+			if(mShaderEntrys.find(id) != mShaderEntrys.end()) {
 				return mShaderEntrys[id];
 			}
-			unlock();
 
-			EngineLog.writeToLog("[ShaderManager::getShader] start loading shader (%s)!", shaderName);
+			ShaderPtr shader(g_RenderBinder->newShader(shaderInfos));
+			shader->asyncLoad(LoadingStateType::STORAGE_DATA_READY);
 
-			ShaderPtr shader(g_RenderBinder->newShader(id));
-
-			const char* path = DRFileManager::Instance().getWholePfad(shaderName);
-			DRString shaderString = shaderName;
-			if(path)
-				shaderString = DRString(DRString(path)+"/"+DRString(shaderName));
-
-			if(!shader.getResourcePtrHolder()->mResource)
-				LOG_ERROR("No Memory for new shader left", 0);
-
-			if(shader->init(shaderString.data(), shaderType))
-				LOG_ERROR("error loading shader", NULL);
-
-			if(!mShaderEntrys.insert(SHADER_ENTRY(id, shader)).second)
-			{
-				LOG_ERROR("Unerwarteter Fehler in ShaderManager::getShader aufgetreten", 0);
+			if (!mShaderEntrys.insert({ id, shader }).second) {
+				LOG_ERROR("Unerwarteter Fehler in ShaderManager::getShader aufgetreten", nullptr);
 			}
-
-			EngineLog.writeToLog("[ShaderManager::getShader] end loading shader!");
 			return shader;
 		}
 	}

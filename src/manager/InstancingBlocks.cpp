@@ -2,7 +2,7 @@
 #include "view/block/GeometrieBlock.h"
 
 namespace UniLib {
-	namespace controller {
+	namespace manager {
 
 		InstancingBlockManager* InstancingBlockManager::mpInstanz = NULL;
 		InstancingBlockManager::InstancingBlockManager()

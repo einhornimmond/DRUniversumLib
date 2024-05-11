@@ -59,6 +59,8 @@ namespace UniLib {
 			inline void updateLoadingState() { mLoadingState = detectLoadingState();}
 			//! actuall load code
 			virtual DRReturn load(LoadingStateType target) = 0;
+			//! overload if loading task must wait for other tasks finishing first
+			virtual bool isReadyForLoad(LoadingStateType target) { return true; }
 		protected:
 			//! calculate current loading state based on data
 			virtual LoadingStateType detectLoadingState() = 0;

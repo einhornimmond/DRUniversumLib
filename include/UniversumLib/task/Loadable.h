@@ -23,6 +23,7 @@ namespace UniLib {
 			virtual ~Loadable();
 			virtual DRReturn run();
 			virtual const char* getResourceType() const { return "task::Loadable"; };
+			virtual bool isReady();
 		protected:
 			LoadingStateType mTargetLoadingState;
 			lib::Loadable* mParent;

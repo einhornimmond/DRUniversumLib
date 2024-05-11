@@ -45,7 +45,7 @@ namespace UniLib {
 			class BlockType;	
 		}
 	}
-	namespace controller {
+	namespace manager {
 
 		// task for parsing block type data
 		class BlockTypeLoadingTask: public DRCPUTask

@@ -23,45 +23,33 @@
 #ifndef __DR_UNIVERSUM_LIB_CONTROLLER_SHADER_MANAGER__
 #define __DR_UNIVERSUM_LIB_CONTROLLER_SHADER_MANAGER__
 
-#include "model/ShaderProgram.h"
-#include "lib/MultithreadContainer.h"
+#include "UniversumLib/model/ShaderProgram.h"
 
-namespace UniLib {
-/*	namespace model {
-		struct ShaderProgramParameter;
-		class Shader;
-		class ShaderProgram;
-		enum ShaderType;
-		typedef DRResourcePtr<ShaderProgram> ShaderProgramPtr;
-		typedef DRResourcePtr<Shader> ShaderPtr;
-	}*/
-	namespace controller {
+#include "DRCore2/Threading/DRMultithreadContainer.h"
 
+#include <map>
+#include <vector>
 
-		class UNIVERSUM_LIB_API ShaderManager : public lib::MultithreadContainer
+namespace UniLib {	
+	namespace manager {
+		class UNIVERSUMLIB_EXPORT ShaderManager : public DRMultithreadContainer
 		{
 		public:
-			
-
-			// Singleton-Daten
-			/*static ShaderManager&		Instance();
-			inline static ShaderManager& getSingleton() {return Instance();};
-			inline static ShaderManager* getSingletonPtr() {return &Instance();};
-			inline static ShaderManager* getInstance() {return &Instance();};
-			static bool	isInitialized()	{return Instance().mInitalized;};
-			*/
+		
 			static ShaderManager* const getInstance();
 			inline static bool	isInitialized()	{return getInstance()->mInitalized;};
 
-			DRReturn init();
+			DRReturn init(const char* shaderBasePath);
 
 			void exit();
 
 			//! lädt oder return instance auf Textur
-			model::ShaderProgramPtr getShaderProgram(const char* shaderProgramName, const char* vertexShader, const char* fragmentShader);
-			model::ShaderProgramPtr getShaderProgram(const char* shaderProgramName);
+			model::ShaderProgramPtr getShaderProgram(const char* shaderProgramName, const std::vector<model::ShaderInformation>& shaderInformations);
+			inline model::ShaderProgramPtr getShaderProgram(const char* shaderProgramName) { return getShaderProgram(makeShaderHash(shaderProgramName)); }
 
-			model::ShaderPtr getShader(const char* shaderName, model::ShaderType shaderType);
+			model::ShaderPtr getShader(const model::ShaderInformation& shaderInfos);
+
+			inline const char* getShaderBasePath() const { return mShaderBasePath.data(); }
 		protected:
 			ShaderManager();
 			ShaderManager(const ShaderManager&);
@@ -70,15 +58,14 @@ namespace UniLib {
 			model::ShaderProgramPtr getShaderProgram(DHASH id);
 			DHASH makeShaderHash(const char* shaderProgramName);
 
+			std::string mShaderBasePath;
+
 			//DRHashList mShaderEntrys;
 			std::map<DHASH, model::ShaderProgramPtr>               mShaderProgramEntrys;
-			typedef std::pair<DHASH, model::ShaderProgramPtr>      SHADER_PROGRAM_ENTRY;
 			std::map<DHASH, model::ShaderPtr>                      mShaderEntrys;
-			typedef std::pair<DHASH, model::ShaderPtr>             SHADER_ENTRY;
 			bool                                            mInitalized;
-#ifdef _UNI_LIB_DEBUG
-			std::map<DHASH, DRString>			mHashCollisionCheckMap;
-			typedef std::pair<DHASH, DRString> HASH_SHADER_ENTRY;
+#ifdef DEBUG
+			std::map<DHASH, std::string>			mHashCollisionCheckMap;
 #endif
 		};
 

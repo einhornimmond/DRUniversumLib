@@ -34,7 +34,7 @@
 
 namespace UniLib {
 	namespace view {	
-		class UNIVERSUMLIB_EXPORT Texture: public lib::Loadable, public DRIResource
+		class UNIVERSUMLIB_EXPORT Texture: public lib::Loadable, public DRIResource, protected DRMultithreadContainer
 		{
 		public:
 			Texture(DHASH id, const char* textureName = NULL);
@@ -58,14 +58,17 @@ namespace UniLib {
 
 			inline DRVector2i getTextureSize() { return mTextureModel->getSize(); }
 
-			// ------  implemented from loadable -------
-			//! detect current loading state
-			virtual LoadingStateType detectLoadingState();
+			// ------  implemented from loadable -------			
 			//! actuall load code, called from loading thread
 			virtual DRReturn load(LoadingStateType target);
 			// -----------------------------------------
 
 		protected:
+			// ------  implemented from loadable -------
+			//! detect current loading state
+			virtual LoadingStateType detectLoadingState();
+			// -----------------------------------------
+
 			std::shared_ptr<model::Texture> mTextureModel;
 			std::string mTextureName;
 
