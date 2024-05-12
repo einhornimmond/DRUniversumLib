@@ -3,6 +3,7 @@
 #include "UniversumLib/task/gpu/Loadable.h"
 #include "UniversumLib/exception/Task.h"
 #include "UniversumLib/exception/Loadable.h"
+#include "UniversumLib/UniversumLib.h"
 
 #include "DRCore2/DRCore2Main.h"
 
@@ -21,7 +22,7 @@ namespace UniLib {
 			}
 		}
 
-		void Loadable::asyncLoad(LoadingStateType target, DRCPUScheduler* loadingScheduler, std::shared_ptr<DRCommand> finishCallback)
+		void Loadable::asyncLoad(LoadingStateType target, std::shared_ptr<DRCommand> finishCallback)
 		{
 			if (!mRunningLoadingTask.expired() && mRunningLoadingTask.use_count()) {
 				throw exception::TaskOrderException("a loading task is already running");
@@ -34,8 +35,10 @@ namespace UniLib {
 			}
 
 			DRTaskPtr task;
-			if (LoadingStateType::STORAGE_DATA_READY == target || LoadingStateType::CPU_DATA_READY == target) {
-				task = std::make_shared<task::Loadable>(loadingScheduler, this, target);
+			if (LoadingStateType::STORAGE_DATA_READY == target) {
+				task = std::make_shared<task::Loadable>(g_StorageScheduler, this, target);
+			} else if (LoadingStateType::CPU_DATA_READY == target) {
+				task = std::make_shared<task::Loadable>(g_MainScheduler, this, target);
 			} else if (LoadingStateType::GPU_DATA_READY == target) {
 				task = std::make_shared<task::gpu::Loadable>(this);
 			}

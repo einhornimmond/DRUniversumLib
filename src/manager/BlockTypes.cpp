@@ -1,35 +1,23 @@
-#include "UniversumLib/controller/BlockTypeManager.h"
+#include "UniversumLib/manager/BlockTypes.h"
 #include "UniversumLib/model/block/MaterialBlock.h"
+#include "UniversumLib/exception/Loadable.h"
+#include "UniversumLib/lib/rapidJson.h"
 
 #include "DRCore2/Utils/DRProfiler.h"
+#include "DRCore2/Foundation/DRFile.h"
+#include "DRCore2/DRCore2Main.h"
+
+using namespace rapidjson;
 
 namespace UniLib {
 	namespace manager {
 
-		// CPU TASK 
-		// parsing block type data
-		DRReturn BlockTypeLoadingTask::run()
-		{
-			return BlockTypeManager::getInstance()->_parsingJsonToBlockTypes(mFileContent);
-		}
-		// loading files with config data into memory
-		DRReturn LoadingJsonFilesIntoMemoryTask::run()
-		{
-			std::string fileContent = readFileAsString(mFileName);
-			DRTaskPtr task(new BlockTypeLoadingTask(mSchedulerForParser, fileContent));
-#ifdef DEBUG
-			task->setName(mFileName.data());
-#endif
-			task->scheduleTask(task);	
-
-			return DR_OK;
-		}
 		// ************************************************************************************************++
 		// BLock Material Manager
 		// ************************************************************************************************++
 
 		BlockTypeManager::BlockTypeManager() 
-			: mLoadingState(LOADING_STATE_EMPTY)
+			: lib::Loadable(LoadingStateType::EMPTY)
 		{
 
 		}
@@ -45,108 +33,117 @@ namespace UniLib {
 			return &theOne;
 		}
 		// called from io Thread or directly
-		DRReturn BlockTypeManager::init(const std::list<std::string>* fileNames)
+		DRReturn BlockTypeManager::init(std::vector<std::string> materialConfigFiles)
 		{
-			for (std::list<std::string>::const_iterator it = fileNames->begin(); it != fileNames->end(); it++) {
-				if (_parsingJsonToBlockTypes(readFileAsString(*it))) {
-					LOG_ERROR("error by parsing Json to block types", DR_ERROR);
+			mMaterialConfigFileNames = std::move(materialConfigFiles);
+			setLoadingState(LoadingStateType::HAS_INFORMATIONS);
+			asyncLoad(LoadingStateType::STORAGE_DATA_READY);
+			return DR_OK;
+		}
+	
+		model::block::BlockType* BlockTypeManager::getBlockType(HASH id)
+		{
+			UNIQUE_LOCK;
+			auto it = mBlockTypes.find(id);
+			if (it != mBlockTypes.end()) {
+				return it->second;
+			}
+			return nullptr;
+		}
+
+		DRReturn BlockTypeManager::load(LoadingStateType target)
+		{
+			UNIQUE_LOCK;
+			auto state = detectLoadingState();
+			if (LoadingStateType::STORAGE_DATA_READY == target) {
+				if (LoadingStateType::HAS_INFORMATIONS != state) {
+					throw exception::LoadableInvalidLoadOrder("missing information for reading block type json files", state, target);
+				}
+				for (auto& configFile : mMaterialConfigFileNames) {
+					DRFile file;
+					file.open(configFile.data(), false, "rt");
+					mMaterialConfigFileContents.push_back(file.readAsString());
+				}
+				setLoadingState(LoadingStateType::STORAGE_DATA_READY);
+				asyncLoad(LoadingStateType::CPU_DATA_READY);
+			}
+			else if (LoadingStateType::CPU_DATA_READY == target) {
+				if (LoadingStateType::STORAGE_DATA_READY != state) {
+					throw exception::LoadableInvalidLoadOrder("missing information for parsing block type json files", state, target);
+				}
+				for (auto& configFile : mMaterialConfigFileContents) {
+					auto result = parsingJsonToBlockTypes(configFile);
+					if (!result) {
+						LOG_ERROR("error parsing block type config file", DR_ERROR);
+					}
 				}
 			}
-			return DR_OK;
-			
-			//return _init();
 		}
-		DRReturn BlockTypeManager::initAsyn(const std::list<std::string>* fileNames, DRCPUScheduler* scheduler)
+
+		LoadingStateType BlockTypeManager::detectLoadingState()
 		{
-			for (std::list<std::string>::const_iterator it = fileNames->begin(); it != fileNames->end(); it++) {
-				DRTaskPtr task(new LoadingJsonFilesIntoMemoryTask(*it, scheduler));
-				task->scheduleTask(task);
-#ifdef DEBUG
-				task->setName(it->data());
-#endif
+			UNIQUE_LOCK;
+			if (mBlockTypes.size()) {
+				return LoadingStateType::FULLY_LOADED;
+			} else if (mMaterialConfigFileContents.size()) {
+				return LoadingStateType::STORAGE_DATA_READY;
+			} else if (mMaterialConfigFileNames.size()) {
+				return LoadingStateType::HAS_INFORMATIONS;
 			}
-			
-			
-			return DR_OK;
+			return LoadingStateType::EMPTY;
 		}
-		
-	
-		//DRReturn _parsingJsonToBlockTypes(const std::string& mFilesContent);
-		DRReturn BlockTypeManager::_parsingJsonToBlockTypes(const std::string& mFileContent)
-		{			
-			DRProfiler startTicks;
-			{
-				UNIQUE_LOCK;
-				mLoadingState = LOADING_STATE_HAS_INFORMATIONS;
+
+		void BlockTypeManager::exit()
+		{
+			UNIQUE_LOCK;
+			for(auto it = mBlockTypes.begin(); it != mBlockTypes.end(); it++) {
+				delete it->second;
 			}
-			
-			Json::Value json = convertStringToJson(mFileContent);
-			Json::Value material = json.get("materialTypes", Json::Value());
-			if (material.isArray()) {
-				for (int i = 0; i < material.size(); i++) {
-					Json::Value entry = material[i];
-					std::string name = entry.get("name", "noname").asString();
-					HASH id = DRMakeStringHash(name.data());
-					auto lock = getUniqueLock(__FUNCTION__);
-					BlockTypelIter it = mBlockTypes.find(id);
-					if (it != mBlockTypes.end()) {
-						if (std::string(it->second->getName()) != name) {
+			mBlockTypes.clear();
+		}
+
+		DRReturn BlockTypeManager::parsingJsonToBlockTypes(const std::string& fileContent)
+		{
+			DRProfiler profiler;
+			auto json = lib::parseJsonFromString(fileContent);
+			auto material = json.FindMember("materialTypes");
+			if (material == json.MemberEnd()) {
+				return DR_OK;
+			}
+			if (material->value.IsArray()) {
+				for (auto& entry: material->value.GetArray())
+				{
+					lib::jsonMemberRequired(entry, "name", JsonMemberType::STRING, model::block::MaterialBlock::objectTypeName);
+					auto name = entry["name"].GetString();
+					auto id = DRMakeStringHash(name);
+					auto blockTypesIt = mBlockTypes.find(id);
+					if (blockTypesIt != mBlockTypes.end()) {
+						if (std::string(blockTypesIt->second->getName()) != name) {
 							DRLog.writeToLog("Material %s and Material %s have the same hash: %d",
-								it->second->getName(), name.data(), id);
-							mWorkMutex.unlock();
+								blockTypesIt->second->getName(), name, id);
 							LOG_ERROR("hash collision", DR_ERROR);
 						}
 						else {
-							DRLog.writeToLog("material: %s", name.data());
-							LOG_WARNING("One material was declared more than once");
+							DRLog.writeToLog("material: %s", name);
+							LOG_WARNING("One material was declared more than once, use only first declaration");
 						}
 					}
 					else {
-						lock.unlock();
 						model::block::MaterialBlock* mat = new model::block::MaterialBlock(name);
 						if (mat->initFromJson(entry)) {
 							delete mat;
 							LOG_ERROR("error by init one material", DR_ERROR);
 						}
 						mat->setId(id);
-						lock.lock();
-						mBlockTypes.insert(BlockTypePair(id, mat));
-						mLoadingState = LOADING_STATE_PARTLY_LOADED;
+						mBlockTypes.insert({ id, mat });
 					}
-					mWorkMutex.unlock();
 				}
 			}
 			else {
 				LOG_ERROR("json isn't a array", DR_ERROR);
 			}
-			{
-				UNIQUE_LOCK;
-				mLoadingState = LOADING_STATE_PARTLY_LOADED;
-			}
-			//EngineLog.writeToLog("[BlockTypeManager::_parsingJsonToBlockTypes] running time: %d ms", SDL_GetTicks() - startTicks);
+			DRLog.writeToLog("[BlockTypeManager::parsingJsonToBlockTypes] running time: %s", profiler.string().data());
 			return DR_OK;
-		}
-
-		model::block::BlockType* BlockTypeManager::getBlockType(HASH id)
-		{
-			mWorkMutex.lock();
-			BlockTypelIter it = mBlockTypes.find(id);
-			model::block::BlockType* result = NULL;
-			if (it != mBlockTypes.end()) {
-				result = it->second;
-			}
-			mWorkMutex.unlock();
-			return result;
-		}
-
-		void BlockTypeManager::exit()
-		{
-			mWorkMutex.lock();
-			for(BlockTypelIter it = mBlockTypes.begin(); it != mBlockTypes.end(); it++) {
-				delete it->second;
-			}
-			mBlockTypes.clear();
-			mWorkMutex.unlock();
 		}
 	}
 }

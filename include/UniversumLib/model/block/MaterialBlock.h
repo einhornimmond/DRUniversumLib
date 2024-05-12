@@ -25,6 +25,7 @@
 #define __UNI_LIB_MODEL_BLOCK_MATERIAL_BLOCK_H
 
 #include "BlockType.h"
+#include "rapidjson/document.h"
 /*!
  *
  * \author: Dario Rekowski
@@ -46,14 +47,13 @@ namespace UniLib {
 				MaterialBlock(std::string name);
 				virtual ~MaterialBlock();
 
-				DRReturn initFromJson(const Json::Value& jsonFileName);
+				DRReturn initFromJson(const rapidjson::Value& jsonFileName);
 
 				virtual const char* getResourceType() const {return "MaterialBlock";}
+				static const char* objectTypeName;
 			protected:
 				std::string mVertexShaderName;
 				std::string mFragmentShaderName;
-				
-
 			};
 		}
 	}

@@ -7,12 +7,15 @@
 
 #include "rapidjson/error/en.h"
 
+#include "SDL.h"
+
 // some dll stuff for windows
 int         g_iProzess = 0;
 int			g_iProzessFunk = 0;
 namespace UniLib {
-	controller::BindToRenderer* g_RenderBinder = NULL;
-	DRCPUScheduler* g_StorageScheduler = NULL;
+	controller::BindToRenderer* g_RenderBinder = nullptr;
+	DRCPUScheduler* g_StorageScheduler = nullptr;
+	DRCPUScheduler* g_MainScheduler = nullptr;
 }
 
 #ifdef _WIN32
@@ -54,49 +57,23 @@ int WINAPI DllMain(HINSTANCE DllHandle, unsigned long ReasonForCall, void* Reser
 namespace UniLib {
     using namespace lib;
 
-    DRReturn init(int numberParallelStorageOperations/* = 1*/)
+    DRReturn init(int cpuWorkerCount, int numberParallelStorageOperations/* = 1*/)
     {
 		SDL_Init(SDL_INIT_TIMER);
         Core2_init("Logger.html");
         
 		g_StorageScheduler = new DRCPUScheduler(numberParallelStorageOperations, "ioThrd");
+		g_MainScheduler = new DRCPUScheduler(cpuWorkerCount, "mainWork");
         return DR_OK;
     }
 
     void exit() 
     {
 		DR_SAVE_DELETE(g_StorageScheduler);
+		DR_SAVE_DELETE(g_MainScheduler);
 		SDL_Quit();
         Core2_exit();
     }
-
-	std::string readFileAsString(std::string filename)
-	{
-		//std::string completePath = 
-		const char* path = DRFileManager::Instance().getWholePfad(filename.data());
-		std::string complete;
-		if(path) {
-			complete = std::string(path) + std::string("/") + std::string(filename);
-		}
-		else {
-			complete = std::string(filename);
-		}
-
-		DRFile file(complete.data(), "rb");
-		if(!file.isOpen()) LOG_ERROR("Error by opening file", std::string());
-		unsigned long size = file.getSize();
-		void* data = malloc(size+1);
-		memset(data, 0, size+1);
-		if(file.read(data, size, 1)) 
-			LOG_ERROR("Error by reading config", std::string());
-		file.close();
-		/// parsing
-
-		std::string result((const char*)data);
-		
-		free(data);
-		return result;
-	}
 
 	rapidjson::Document convertStringToRapidJson(std::string jsonString)
 	{

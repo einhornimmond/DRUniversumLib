@@ -1,0 +1,15 @@
+#ifndef __UNIVERSUM_LIB_TYPE_JSON_MEMBER_TYPE_H
+#define __UNIVERSUM_LIB_TYPE_JSON_MEMBER_TYPE_H
+
+namespace UniLib {
+	enum class JsonMemberType {
+		STRING,
+		INTEGER,
+		FLOAT,
+		NUMBER,
+		ARRAY, 
+		OBJECT
+	};
+}
+
+#endif //__UNIVERSUM_LIB_TYPE_JSON_MEMBER_TYPE_H

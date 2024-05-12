@@ -31,88 +31,57 @@
  * 
  */
 
-#include "UniversumLib/export.h"
-#include "DRCore2/Threading/DRCPUTask.h"
-#include "DRCore2/Threading/DRCPUScheduler.h"
+#include "UniversumLib/lib/Loadable.h"
+#include "UniversumLib/model/block/BlockType.h"
+
 #include "DRCore2/Threading/DRMultithreadContainer.h"
 #include "DRCore2/Foundation/DRHash.h"
 
 #include <map>
 
 namespace UniLib {
-	namespace model {
-		namespace block {
-			class BlockType;	
-		}
-	}
-	namespace manager {
-
-		// task for parsing block type data
-		class BlockTypeLoadingTask: public DRCPUTask
+	namespace manager {		
+		
+		class UNIVERSUMLIB_EXPORT BlockTypeManager : public lib::Loadable, protected DRMultithreadContainer
 		{
-		public:
-			BlockTypeLoadingTask(DRCPUScheduler* scheduler, std::string fileContent)
-				: DRCPUTask(scheduler), mFileContent(fileContent) {}
-
-			virtual DRReturn run();
-			virtual bool isTaskFinished() {return false;};
-			virtual const char* getResourceType() const { return "BlockTypeLoadingTask"; };
-		protected:
-			std::string mFileContent;
-
-
-		};
-		// task for loading files from harddisk
-		class LoadingJsonFilesIntoMemoryTask : public DRCPUTask
-		{
-		public:
-			LoadingJsonFilesIntoMemoryTask(std::string filename, DRCPUScheduler* schedulerForParser)
-				: DRCPUTask(g_HarddiskScheduler), mFileName(filename), mSchedulerForParser(schedulerForParser) {
-#ifdef _UNI_LIB_DEBUG
-				setName(filename.data());
-#endif //_UNI_LIB_DEBUG
-			}
-
-			virtual DRReturn run();
-			virtual bool isTaskFinished() { return false; };
-			virtual const char* getResourceType() const { return "LoadingJsonFilesIntoMemoryTask"; };
-		protected:
-			std::string mFileName;
-			DRCPUScheduler* mSchedulerForParser;
-		};
-
-		class UNIVERSUMLIB_EXPORT BlockTypeManager : protected DRMultithreadContainer
-		{
-			friend BlockTypeLoadingTask;
-			friend LoadingJsonFilesIntoMemoryTask;
 		public:
 			static BlockTypeManager* getInstance();
-			DRReturn init(const std::list<std::string>* filenames);
-			DRReturn initAsyn(const std::list<std::string>* filenames, DRCPUScheduler* scheduler);
+			//!
+			//! \param materialConfigFiles move vector
+			DRReturn init(std::vector<std::string> materialConfigFiles);
 			// calling after every object using MaterialBlocks was cleaned up
 			void exit();
 
-			inline LoadingState checkLoadingState() { UNIQUE_LOCK; return mLoadingState; }
 			inline model::block::BlockType* getBlockType(HASH id);
 			inline model::block::BlockType* getBlockType(const char* name) { return getBlockType(DRMakeStringHash(name));}
 
+			// ------  implemented from loadable -------			
+			//! actuall load code
+			virtual DRReturn load(LoadingStateType target);
+			// -----------------------------------------
 
 		protected:
+			// ------  implemented from loadable -------			
+			virtual LoadingStateType detectLoadingState();
+			// -----------------------------------------
+
 			BlockTypeManager();
 			virtual ~BlockTypeManager();
 
-			DRReturn _parsingJsonToBlockTypes(const std::string& mFilesContent);
+			DRReturn parsingJsonToBlockTypes(const std::string& fileContent);
+
+			// for loading
+			// if loading state has informations = filename
+			// if loading state storage data ready = actuall file content
+			std::vector<std::string> mMaterialConfigFileNames;
+			std::vector<std::string> mMaterialConfigFileContents;
 
 			// member variables
 			DRMultithreadContainer mWorkMutex;
 			typedef std::map<HASH, model::block::BlockType*> BlockTypeMap;
-			typedef std::pair<HASH, model::block::BlockType*> BlockTypePair;
-			typedef BlockTypeMap::iterator BlockTypelIter;
 			BlockTypeMap mBlockTypes;
 
-		private:
-			LoadingState mLoadingState;
-			
+		private:	
 
 		};
 	}

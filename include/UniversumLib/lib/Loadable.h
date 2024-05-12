@@ -53,7 +53,7 @@ namespace UniLib {
 			//! \param start task for calling load async
 			//! \param target target loading state
 			//! \param finishCallback called after finish loading
-			void asyncLoad(LoadingStateType target, DRCPUScheduler* loadingScheduler = nullptr, std::shared_ptr<DRCommand> finishCallback = nullptr);
+			void asyncLoad(LoadingStateType target, std::shared_ptr<DRCommand> finishCallback = nullptr);
 
 			LoadingStateType checkLoadingState() const { return mLoadingState; }			
 			inline void updateLoadingState() { mLoadingState = detectLoadingState();}

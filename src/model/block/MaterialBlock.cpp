@@ -1,8 +1,15 @@
 #include "UniversumLib/model/block/MaterialBlock.h"
+#include "UniversumLib/lib/rapidJson.h"
+
+#include "magic_enum/magic_enum.hpp"
+
+using namespace rapidjson;
 
 namespace UniLib {
 	namespace model {
 		namespace block {
+			const char* MaterialBlock::objectTypeName = "Material";
+
 			MaterialBlock::MaterialBlock(std::string name)
 			: BlockType(name)
 			{
@@ -14,22 +21,27 @@ namespace UniLib {
 
 			}
 
-			DRReturn MaterialBlock::initFromJson(const Json::Value& json)
+			DRReturn MaterialBlock::initFromJson(const Value& json)
 			{
-				UNIQUE_LOCK;
-				if(mLoadingState == LOADING_STATE_EMPTY) {
-					std::string baseType = json.get("base_type", "solid").asString();
-					mBaseType = getBlockBaseTypeEnum(baseType);
-					mTransparency = json.get("transparency", false).asBool();
-					mDensity = json.get("density", 0.0f).asFloat();
-					mMeltingPoint = json.get("melting_point", 0.0f).asFloat();
-					mHitpoints = json.get("hitpoints", 0).asInt();
-					Json::Value shaderJson = json.get("shader", Json::Value());
-					mFragmentShaderName = shaderJson.get("fragment", std::string("")).asString();
-					mVertexShaderName = shaderJson.get("vertex", std::string("")).asString();
-					mLoadingState = LOADING_STATE_FULLY_LOADED;
+				lib::jsonMemberRequired(json, "base_type", JsonMemberType::STRING, objectTypeName);
+				lib::jsonMemberRequired(json, "density", JsonMemberType::FLOAT, objectTypeName);
+				lib::jsonMemberRequired(json, "melting_point", JsonMemberType::FLOAT, objectTypeName);
+				lib::jsonMemberRequired(json, "hitpoints", JsonMemberType::INTEGER, objectTypeName);
+				lib::jsonMemberRequired(json, "shader", JsonMemberType::OBJECT, objectTypeName);
 
-					//EngineLog.writeToLog("[MaterialBlock::initFromJson] adding block: %s", asString().data());
+				mBaseType = magic_enum::enum_cast<BlockAggregateType>(json["base_type"].GetString()).value_or(BlockAggregateType::NONE);
+				if (json.HasMember("transparency") && json["transparency"].IsBool()) {
+					mTransparency = json["transparency"].GetBool();
+				}
+				mDensity = json["density"].GetFloat();
+				mMeltingPoint = json["melting_point"].GetFloat();
+				mHitpoints = json["hitpoints"].GetInt();
+				auto shader = json["shader"].GetObject();
+				if (shader.HasMember("fragment") && shader["fragment"].IsString()) {
+					mFragmentShaderName = shader["fragment"].GetString();
+				}
+				if (shader.HasMember("vertex") && shader["vertex"].IsString()) {
+					mVertexShaderName = shader["vertex"].GetString();
 				}
 
 				return DR_OK;

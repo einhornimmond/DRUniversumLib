@@ -1,0 +1,15 @@
+#ifndef __UNIVERSUM_LIB_TYPE_BLOCK_AGGREGATE_TYPE_H
+#define __UNIVERSUM_LIB_TYPE_BLOCK_AGGREGATE_TYPE_H
+
+namespace UniLib {
+	enum class BlockAggregateType
+	{
+		NONE = 0,
+		SOLID = 1,
+		FLUENT = 2,
+		GAS = 3,
+		ENTRY_COUNT = 4
+	};
+}
+
+#endif //__UNIVERSUM_LIB_TYPE_BLOCK_AGGREGATE_TYPE_H

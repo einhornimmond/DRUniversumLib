@@ -46,10 +46,9 @@ namespace UniLib {
 		class CPUSheduler;
 	};
 	UNIVERSUMLIB_EXPORT extern controller::BindToRenderer* g_RenderBinder;
+	// 
 	UNIVERSUMLIB_EXPORT extern DRCPUScheduler* g_StorageScheduler;
-#ifdef _WINDOWS_
-	extern LARGE_INTEGER g_QueryPerformanceFreq;
-#endif // _WINDOWS_
+	UNIVERSUMLIB_EXPORT extern DRCPUScheduler* g_MainScheduler;
 };
 
 // define OpenGL Types and defines if we haven't openGL
@@ -75,12 +74,12 @@ namespace UniLib {
 	// TODO: replace enums with typed enum classes	
 
 	//! \brief 
+	//! \param cpuWorkerCount worker count of main scheduler, should be cpu thread count
 	//! \param numberParallelStorageOperations count of storage operations (read and write) at the same time
 	//!        1 recommended by mechanical hard disks, else more possible    
-	UNIVERSUMLIB_EXPORT DRReturn init(int numberParallelStorageOperations = 1);
+	UNIVERSUMLIB_EXPORT DRReturn init(int cpuWorkerCount, int numberParallelStorageOperations = 1);
 	UNIVERSUMLIB_EXPORT void exit();
 	
-	UNIVERSUMLIB_EXPORT std::string readFileAsString(std::string filename);
 	UNIVERSUMLIB_EXPORT rapidjson::Document convertStringToJson(const std::string& jsonString);
 	UNIVERSUMLIB_EXPORT void setBindToRenderer(controller::BindToRenderer* bindToRender);
 }

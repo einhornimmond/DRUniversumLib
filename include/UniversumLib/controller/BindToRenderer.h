@@ -49,6 +49,7 @@ namespace UniLib {
 	}
 	namespace model {
 		class Shader;
+		typedef std::shared_ptr<Shader> ShaderPtr;
 		struct ShaderInformation;
 		class ShaderProgamBinary;
 		class ShaderProgram;

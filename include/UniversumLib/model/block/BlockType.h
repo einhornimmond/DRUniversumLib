@@ -24,7 +24,13 @@
 #ifndef __UNI_LIB_MODEL_BLOCK_BLOCK_TYPE_H
 #define __UNI_LIB_MODEL_BLOCK_BLOCK_TYPE_H
 
-#include "UniversumLib/lib/MultithreadResource.h"
+#include "UniversumLib/export.h"
+#include "UniversumLib/type/BlockAggregateType.h"
+
+#include "DRCore2/Foundation/DRIResource.h"
+#include "DRCore2/DRTypes.h"
+
+#include <string>
 /*!
  *
  * \author: Dario Rekowski
@@ -40,16 +46,7 @@ namespace UniLib {
 	namespace model {
 		namespace block {
 
-			enum BlockBaseType {
-				BLOCK_BASE_TYPE_NONE = 0,
-				BLOCK_BASE_TYPE_SOLID = 1,
-				BLOCK_BASE_TYPE_FLUENT = 2,
-				BLOCK_BASE_TYPE_GAS = 3
-			};
-
-			
-
-			class UNIVERSUMLIB_EXPORT BlockType : public lib::MultithreadResource
+			class UNIVERSUMLIB_EXPORT BlockType : public DRIResource
 			{
 			public:
 				BlockType(std::string name);
@@ -66,28 +63,24 @@ namespace UniLib {
 				inline float getDensity() {return mDensity;}
 				inline float getMeltingPoint() {return mMeltingPoint;}
 				inline int getHitPoints() {return mHitpoints;}
-				inline BlockBaseType getBaseType() { return mBaseType; }
+				inline BlockAggregateType getBaseType() { return mBaseType; }
 
 				// setter 
 				inline void setId(HASH id) {mId = id;}
 
 				// for debugging
-				std::string asString();
+				std::string toString();
 			protected:
 				// control
 				int mId;
 
 				// block attributes
 				std::string mName;
-				BlockBaseType mBaseType;
+				BlockAggregateType mBaseType;
 				bool mTransparency;
 				float mDensity;
 				float mMeltingPoint;
 				int mHitpoints;
-
-				// string to enum, enum to string functions
-				static BlockBaseType getBlockBaseTypeEnum(std::string blockBaseTypeString);
-
 			};
 		}
 	}
