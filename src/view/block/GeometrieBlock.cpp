@@ -1,5 +1,5 @@
-#include "view/block/GeometrieBlock.h"
-#include "model/block/GeometrieBlock.h"
+#include "UniversumLib/view/block/GeometrieBlock.h"
+#include "UniversumLib/model/block/GeometrieBlock.h"
 
 namespace UniLib {
 	namespace view {
@@ -18,8 +18,8 @@ namespace UniLib {
 
 			void GeometrieBlock::clearGeometrieBlockList()
 			{
-				for(std::list<model::GeometrieBlockPtr>::iterator it = mGeometrieBlockModels.begin(); it != mGeometrieBlockModels.end(); it++) {
-					if(it->getResourcePtrHolder()->getRefCount() == 1) {
+				for(auto it = mGeometrieBlockModels.begin(); it != mGeometrieBlockModels.end(); it++) {
+					if(it->use_count() == 1) {
 						it = mGeometrieBlockModels.erase(it);
 					}
 				}

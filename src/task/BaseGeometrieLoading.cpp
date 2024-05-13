@@ -1,5 +1,4 @@
 #include "UniversumLib/task/BaseGeometrieLoading.h"
-#include "UniversumLib/task/gpu/BaseGeometrieLoading.h"
 #include "UniversumLib/type/BaseGeometrieType.h"
 #include "UniversumLib/type/GeometrieDataType.h"
 #include "UniversumLib/manager/BaseGeometries.h"

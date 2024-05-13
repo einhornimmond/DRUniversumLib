@@ -39,7 +39,7 @@
 namespace UniLib {
 	namespace model {
 
-		class UNIVERSUM_LIB_API MovingNode: public MoveableNode
+		class UNIVERSUMLIB_EXPORT MovingNode: public MoveableNode
 		{
 		public:
 			MovingNode(MovingNode* parent = NULL, const DRVector3& position = DRVector3(0.0f));

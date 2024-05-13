@@ -1,5 +1,5 @@
-#include "view/Material.h"
-#include "model/ShaderProgram.h"
+#include "UniversumLib/view/Material.h"
+#include "UniversumLib/model/ShaderProgram.h"
 
 namespace UniLib {
 	namespace view {
@@ -14,17 +14,15 @@ namespace UniLib {
 
 		}
 
-		LoadingState Material::checkLoadingState()
+		LoadingStateType Material::checkLoadingState()
 		{
-			if (mShaderProgram.getResourcePtrHolder() && mShaderProgram->checkLoadingState() == LOADING_STATE_FULLY_LOADED && mUniformsSet) {
-				return LOADING_STATE_FULLY_LOADED;
+			if (mShaderProgram && mShaderProgram->checkLoadingState() == LoadingStateType::FULLY_LOADED && mUniformsSet) {
+				return LoadingStateType::FULLY_LOADED;
 			}
-			if ( (!mShaderProgram.getResourcePtrHolder() && mUniformsSet) ||
-				  (!mUniformsSet && mShaderProgram.getResourcePtrHolder()) ) {
-				return LOADING_STATE_PARTLY_LOADED;
+			if (!mShaderProgram || !mUniformsSet) {
+				return LoadingStateType::EMPTY;
 			}
-
-			return LOADING_STATE_EMPTY;
+			return mShaderProgram->checkLoadingState();
 		}
 		
 	}

@@ -23,11 +23,11 @@
 #ifndef __DR_UNIVERSUM_LIB_GENERATOR_SEKTOR_H__ 
 #define __DR_UNIVERSUM_LIB_GENERATOR_SEKTOR_H__
 
-#include "UniversumLib.h"
+#include "UniversumLib/export.h"
 
 namespace UniLib {
 	namespace generator {
-		class UNIVERSUM_LIB_API Sector
+		class UNIVERSUMLIB_EXPORT Sector
 		{
 		public:
 			Sector();

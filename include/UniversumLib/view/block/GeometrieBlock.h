@@ -24,7 +24,9 @@
 #ifndef __UNI_LIB_VIEW_BLOCK_GEOMETRIE_BLOCK_H
 #define __UNI_LIB_VIEW_BLOCK_GEOMETRIE_BLOCK_H
 
-#include "controller/GPUScheduler.h"
+#include "UniversumLib/task/gpu/Scheduler.h"
+#include "UniversumLib/model/block/GeometrieBlock.h"
+
 /*!
  *
  * \author: Dario Rekowski
@@ -41,8 +43,6 @@
 namespace UniLib {
 	namespace model {
 		class UniformSet;
-		class GeometrieBlock;
-		typedef DRResourcePtr<GeometrieBlock> GeometrieBlockPtr;
 	}
 	namespace view {
 		namespace geometrie {
@@ -51,7 +51,7 @@ namespace UniLib {
 		class Material;		
 		namespace block {
 
-			class UNIVERSUM_LIB_API GeometrieBlock : public controller::GPURenderCall
+			class UNIVERSUMLIB_EXPORT GeometrieBlock : public task::gpu::IGPURenderCall
 			{
 			public:
 				GeometrieBlock();
@@ -66,7 +66,7 @@ namespace UniLib {
 
 				// remove all geometrie block ptr with ref = 1
 				void clearGeometrieBlockList();
-				inline void addGeometrieBlock(model::GeometrieBlockPtr geometrieBlock) {mGeometrieBlockModels.push_back(geometrieBlock);}
+				inline void addGeometrieBlock(model::block::GeometrieBlockPtr geometrieBlock) {mGeometrieBlockModels.push_back(geometrieBlock);}
 
 				inline size_t getGeometrieBlockCount() {return mGeometrieBlockModels.size();}
 				
@@ -74,7 +74,7 @@ namespace UniLib {
 				Material* mMaterial;
 				geometrie::BaseGeometrieContainer* mGeometrie;
 				model::UniformSet* mMatrixUniforms;
-				std::list<model::GeometrieBlockPtr> mGeometrieBlockModels;
+				std::list<model::block::GeometrieBlockPtr> mGeometrieBlockModels;
 			};
 		}
 	}

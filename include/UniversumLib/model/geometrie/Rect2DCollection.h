@@ -34,13 +34,13 @@
 #define __UNIVERSUM_LIB_MODEL_GEOMETRIE_RECT2D_COLLECTION__H
 
 #include "BaseGeometrie.h" 
+#include "DRCore2/Algorithm/DRPack2D.h"
 
 namespace UniLib {
-
 	namespace model {
 		namespace geometrie {
 
-			class UNIVERSUM_LIB_API Rect2DCollection : public BaseGeometrie
+			class UNIVERSUMLIB_EXPORT Rect2DCollection : public BaseGeometrie
 			{
 			public:
 				Rect2DCollection();

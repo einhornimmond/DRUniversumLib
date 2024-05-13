@@ -35,14 +35,10 @@
 #include "Material.h"
 #include "Texture.h"
 
-namespace UniLib {
-	
+namespace UniLib {	
 	namespace view {
-
-		//class Texture;
-		//typedef DRResourcePtr<Texture> TexturePtr;
-
-		class UNIVERSUM_LIB_API TextureMaterial : public Material
+		
+		class UNIVERSUMLIB_EXPORT TextureMaterial : public Material
 		{
 		public:
 			TextureMaterial();
@@ -56,7 +52,7 @@ namespace UniLib {
 			void usingTexture(const char* filename);
 			inline TexturePtr getTexture() { return mTexture; }
 
-			virtual LoadingState checkLoadingState();
+			virtual LoadingStateType checkLoadingState();
 		protected:
 			TexturePtr mTexture;
 		};

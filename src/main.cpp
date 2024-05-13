@@ -55,7 +55,6 @@ int WINAPI DllMain(HINSTANCE DllHandle, unsigned long ReasonForCall, void* Reser
 #endif //_WIN32
 
 namespace UniLib {
-    using namespace lib;
 
     DRReturn init(int cpuWorkerCount, int numberParallelStorageOperations/* = 1*/)
     {
@@ -74,16 +73,6 @@ namespace UniLib {
 		SDL_Quit();
         Core2_exit();
     }
-
-	rapidjson::Document convertStringToRapidJson(std::string jsonString)
-	{
-		rapidjson::Document d;
-		d.Parse(jsonString.data());
-		if (d.HasParseError()) {
-			LOG_ERROR(rapidjson::GetParseError_En(d.GetParseError()), rapidjson::Document());
-		}
-		return d;
-	}
 
 	void setBindToRenderer(controller::BindToRenderer* bindToRender)
 	{

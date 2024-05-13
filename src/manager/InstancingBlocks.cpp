@@ -1,44 +1,39 @@
-#include "controller/InstancingBlockManager.h"
-#include "view/block/GeometrieBlock.h"
+#include "UniversumLib/manager/InstancingBlocks.h"
+
 
 namespace UniLib {
 	namespace manager {
 
-		InstancingBlockManager* InstancingBlockManager::mpInstanz = NULL;
-		InstancingBlockManager::InstancingBlockManager()
+		InstancingBlocks::InstancingBlocks()
 		{
 
 		}
 
-		InstancingBlockManager::~InstancingBlockManager()
+		InstancingBlocks::~InstancingBlocks()
 		{
 
 		}
 
-		InstancingBlockManager* InstancingBlockManager::getInstance()
+		InstancingBlocks* InstancingBlocks::getInstance()
 		{
-			// Die Instanz wird erst beim ersten Aufruf erzeugt.
-			if (!mpInstanz)
-				mpInstanz = new InstancingBlockManager;
-			return mpInstanz;
+			static InstancingBlocks one;
+			return &one;
 		}
 
-		void InstancingBlockManager::clearEmptyGeometrieBlocks()
+		void InstancingBlocks::clearEmptyGeometrieBlocks()
 		{
-			for(std::map<HASH, view::block::GeometrieBlock*>::iterator it = mGeometrieBlocks.begin(); it != mGeometrieBlocks.end(); it++) {
+			for(auto it = mGeometrieBlocks.begin(); it != mGeometrieBlocks.end(); it++) {
 				if(it->second->getGeometrieBlockCount() == 0) {
-					delete it->second;
 					it = mGeometrieBlocks.erase(it);
 				}
 			}
-			//clearEmptyGeometrieBlocks
 		}
 
-		view::block::GeometrieBlock* InstancingBlockManager::findGeometrieBlock(HASH id)
+		std::shared_ptr<view::block::GeometrieBlock> InstancingBlocks::findGeometrieBlock(HASH id)
 		{
-			std::map<HASH, view::block::GeometrieBlock*>::iterator it = mGeometrieBlocks.find(id);
+			auto it = mGeometrieBlocks.find(id);
 			if(it != mGeometrieBlocks.end()) return it->second;
-			return NULL;
+			return nullptr;
 		}
 	}
 }

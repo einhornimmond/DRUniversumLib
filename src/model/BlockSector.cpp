@@ -12,7 +12,7 @@ namespace UniLib {
 		BlockSector::BlockSector(Node* parent, model::SectorID* id, view::BlockSector* viewSector)
 			: Sector(parent, id, dynamic_cast<view::Sector*>(viewSector))
 		{
-			mType = BLOCK_SEKTOR_NODE;
+			mType = NodeType::BLOCK_SECTOR;
 			memset(mGridSolid, 0, sizeof(u16) * 8 * 8);
 		}			//
 
@@ -31,17 +31,16 @@ namespace UniLib {
 			if(!isPlaceFree(h)) LOG_ERROR("cannot insert new block, position already occupied!", DR_ERROR);
 			mBlocks.insert(BlockPair(h, block));
 
-			block::BlockBaseType type = block->getBlockType()->getBaseType();
-			assert(type < 3 && type >= 0);
+			auto type = block->getBlockType()->getBaseType();
+			assert(magic_enum::enum_integer(type) < 3 && magic_enum::enum_integer(type) >= 0);
 			// logging 
 			//EngineLog.writeToLog("grid before adding block: %s", getValueAsBinaryString(mGridSolid[index.y][index.z]).data());
 			//clear
 			mGridSolid[index.y][index.z] &= 0xffff ^ (3 << (index.x * 2));
 			// set new value
-			mGridSolid[index.y][index.z] |= type << (index.x * 2);
+			mGridSolid[index.y][index.z] |= magic_enum::enum_integer(type) << (index.x * 2);
 			//EngineLog.writeToLog("grid after adding this block base type: %d\n%s",
-			//	(int)type, getValueAsBinaryString(mGridSolid[index.y][index.z]).data());
-			
+			//	(int)type, getValueAsBinaryString(mGridSolid[index.y][index.z]).data());			
 
 			return DR_OK;
 		}

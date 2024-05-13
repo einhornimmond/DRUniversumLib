@@ -79,8 +79,7 @@ namespace UniLib {
 	//!        1 recommended by mechanical hard disks, else more possible    
 	UNIVERSUMLIB_EXPORT DRReturn init(int cpuWorkerCount, int numberParallelStorageOperations = 1);
 	UNIVERSUMLIB_EXPORT void exit();
-	
-	UNIVERSUMLIB_EXPORT rapidjson::Document convertStringToJson(const std::string& jsonString);
+
 	UNIVERSUMLIB_EXPORT void setBindToRenderer(controller::BindToRenderer* bindToRender);
 }
 

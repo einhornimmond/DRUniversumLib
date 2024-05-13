@@ -29,6 +29,10 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 if(MSVC)
     #build with multicore support when using visual studio
     #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+
+	# Suppress warning C4003 for Visual Studio Compiler
+	add_compile_options(/wd4003)
+
 endif()
 
 if (NOT DEFINED CMAKE_CXX_VISIBILITY_PRESET AND
@@ -62,7 +66,6 @@ FILE(GLOB SERVER_SRC "src/server/*.cpp" "include/UniversumLib/server/*.h")
 FILE(GLOB SRC "src/*.cpp" "include/UniversumLib/*.h")
 FILE(GLOB TASK_SRC "src/task/*.cpp" "include/UniversumLib/task/*.h")
 FILE(GLOB TASK_GPU_SRC "src/task/gpu/*.cpp" "include/UniversumLib/task/gpu/*.h")
-FILE(GLOB TASK_NETWORK_SRC "src/task/network/*.cpp" "include/UniversumLib/task/network/*.h")
 FILE(GLOB TYPE_INCLUDE "include/UniversumLib/type/*.h")
 FILE(GLOB VIEW_SRC "src/view/*.cpp" "include/UniversumLib/view/*.h")
 FILE(GLOB VIEW_BLOCK_SRC "src/view/block/*.cpp" "include/UniversumLib/view/block/*.h")
@@ -81,7 +84,6 @@ SET(UniversumLibSrc
 	${SRC}
 	${TASK_SRC}
 	${TASK_GPU_SRC}
-	${TASK_NETWORK_SRC}
 	${TYPE_INCLUDE}
 	${VIEW_SRC}			     
 	${VIEW_BLOCK_SRC}
@@ -97,8 +99,7 @@ if(MSVC)
 	source_group("model\\geometrie" FILES ${MODEL_GEOMETRIE_SRC})
 	source_group("model" FILES ${MODEL_SRC} )
 	source_group("server" FILES ${SERVER_SRC} )
-	source_group("task\\gpu" FILES ${TASK_GPU_SRC})
-	source_group("task\\network" FILES ${TASK_NETWORK_SRC})
+	source_group("task\\gpu" FILES ${TASK_GPU_SRC})	
 	source_group("task" FILES ${TASK_SRC} )
 	source_group("type" FILES ${TYPE_INCLUDE})
 	source_group("view\\block" FILES ${VIEW_BLOCK_SRC})

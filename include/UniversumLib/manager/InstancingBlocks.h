@@ -31,31 +31,25 @@
 #ifndef _DR_UNIVERSUM_LIB_CONTROLLER_INSTANCING_BLOCK_MANAGER_H_
 #define _DR_UNIVERSUM_LIB_CONTROLLER_INSTANCING_BLOCK_MANAGER_H_
 
-#include "lib/Singleton.h"
+#include "UniversumLib/view/block/GeometrieBlock.h"
+
+#include <map>
 
 namespace UniLib {
-	namespace view {
-		namespace block {
-			class GeometrieBlock;
-		}
-	}
 	namespace manager {
-		class InstancingBlockManager : public lib::Singleton
+		class UNIVERSUMLIB_EXPORT InstancingBlocks
 		{
 		public:
 			// return the one and one instance (create if not exist)
-			static InstancingBlockManager* getInstance();
+			static InstancingBlocks* getInstance();
 
-			virtual view::block::GeometrieBlock* findGeometrieBlock(HASH id);
+			virtual std::shared_ptr<view::block::GeometrieBlock> findGeometrieBlock(HASH id);
 			void clearEmptyGeometrieBlocks();
 		protected:
-			InstancingBlockManager();
-			virtual ~InstancingBlockManager();
+			InstancingBlocks();
+			virtual ~InstancingBlocks();
 
-			std::map<HASH, view::block::GeometrieBlock*> mGeometrieBlocks;
-			typedef std::pair<HASH, view::block::GeometrieBlock*> GEOMETRIE_BLOCK_PAIR;
-
-			static InstancingBlockManager* mpInstanz;
+			std::map<HASH, std::shared_ptr<view::block::GeometrieBlock>> mGeometrieBlocks;
 		};
 	}
 }

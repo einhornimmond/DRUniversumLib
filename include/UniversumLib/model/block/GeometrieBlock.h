@@ -26,6 +26,8 @@
 
 #include "BlockType.h"
 #include "UniversumLib/model/Position.h"
+
+#include <memory>
 /*!
  *
  * \author: Dario Rekowski
@@ -58,6 +60,8 @@ namespace UniLib {
 			protected:
 				Position mPosition;
 			};
+
+			typedef std::shared_ptr<GeometrieBlock> GeometrieBlockPtr;
 		}
 	}
 }

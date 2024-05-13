@@ -9,25 +9,25 @@
 namespace UniLib {
 	namespace manager {
 
-		TextureManager::TextureManager()
+		Textures::Textures()
 			: mInitalized(false), mTimer(nullptr)
 		{
 
 		}
 
-		TextureManager::TextureManager(const TextureManager&)
+		Textures::Textures(const Textures&)
 			: mInitalized(false), mTimer(nullptr)
 		{
 
 		}
 
-		TextureManager* const TextureManager::getInstance()
+		Textures* const Textures::getInstance()
 		{
-			static TextureManager TheOneAndOnly;
+			static Textures TheOneAndOnly;
 			return &TheOneAndOnly;
 		}
 
-		DRReturn TextureManager::init(DRFuzzyTimer* updateTimer, std::chrono::duration<u64, std::milli> rerunDelay/* = 10000ms*/)
+		DRReturn Textures::init(DRFuzzyTimer* updateTimer, std::chrono::duration<u64, std::milli> rerunDelay/* = 10000ms*/)
 		{
 			// wait 20 seconds before deleting not used textures, maybe some other thread need the memory
 			mTimeToLetEmptyTexturesInStorage = 20s;
@@ -39,7 +39,7 @@ namespace UniLib {
 			return DR_OK;
 		}
 
-		void TextureManager::exit()
+		void Textures::exit()
 		{
 			mInitalized = false;
 			if (mTimer) {
@@ -48,7 +48,7 @@ namespace UniLib {
 			LOG_INFO("TextureManager beendet");
 		}
 
-		view::TexturePtr TextureManager::getTexture(const char* filename)
+		view::TexturePtr Textures::getTexture(const char* filename)
 		{
 			assert(g_RenderBinder != NULL);
 
@@ -64,7 +64,7 @@ namespace UniLib {
 			return tex;
 		}
 
-		view::TexturePtr TextureManager::getEmptyTexture(DRVector2i size, GLenum format)
+		view::TexturePtr Textures::getEmptyTexture(DRVector2i size, GLenum format)
 		{
 			assert(g_RenderBinder != NULL);
 
@@ -81,7 +81,7 @@ namespace UniLib {
 			return tex;
 		}
 
-		void TextureManager::giveBackEmptyTexture(view::TexturePtr tex)
+		void Textures::giveBackEmptyTexture(view::TexturePtr tex)
 		{
 			DHASH id = tex->getId();
 			UNIQUE_LOCK;
@@ -91,7 +91,7 @@ namespace UniLib {
 			mEmptyTextures.insert(EmptyTextureEntry(id, empty));
 		}
 
-		TimerReturn TextureManager::callFromTimer()
+		TimerReturn Textures::callFromTimer()
 		{
 			if (!mInitalized) return TimerReturn::REMOVE_ME;
 			UNIQUE_LOCK;

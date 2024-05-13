@@ -1,6 +1,6 @@
-#include "view/MultiTextureMaterial.h"
-#include "view/Texture.h"
-#include "controller/TextureManager.h"
+#include "UniversumLib/view/MultiTextureMaterial.h"
+#include "UniversumLib/view/Texture.h"
+#include "UniversumLib/manager/Textures.h"
 
 namespace UniLib {
 	namespace view {
@@ -17,7 +17,7 @@ namespace UniLib {
 		void MultiTextureMaterial::usingTexture(const char* filename, size_t index)
 		{
 			assert(index < mTextureCount);
-			controller::TextureManager* t = controller::TextureManager::getInstance();
+			manager::Textures* t = manager::Textures::getInstance();
 			mTextures[index] = t->getTexture(filename);
 		}
 	}

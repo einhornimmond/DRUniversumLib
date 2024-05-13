@@ -35,6 +35,7 @@
 #define __DR_UNIVERSUM_LIN_CONTROLLER_TEXTURE_MANAGER_H
 
 #include "UniversumLib/UniversumLib.h"
+#include "UniversumLib/view/Texture.h"
 #include "DRCore2/DRTypes.h"
 #include "DRCore2/Foundation/DRVector2i.h"
 #include "DRCore2/Threading/DRFuzzyTimer.h"
@@ -48,15 +49,11 @@ using namespace std::chrono_literals;
 
 namespace UniLib {
 
-	namespace view {
-		class Texture;
-		typedef std::shared_ptr<Texture> TexturePtr;
-	}
 	namespace manager {
-		class UNIVERSUMLIB_EXPORT TextureManager: public DRTimerCallback, private DRMultithreadContainer
+		class UNIVERSUMLIB_EXPORT Textures: public DRTimerCallback, private DRMultithreadContainer
 		{
 		public:
-			static TextureManager* const getInstance();
+			static Textures* const getInstance();
 			inline static bool	isInitialized() { return getInstance()->mInitalized; };
 
 			//! \brief init 
@@ -85,9 +82,9 @@ namespace UniLib {
 			TimerReturn callFromTimer();
 
 		protected:
-			TextureManager();
-			TextureManager(const TextureManager&);
-			virtual ~TextureManager() { if (mInitalized) exit(); };
+			Textures();
+			Textures(const Textures&);
+			virtual ~Textures() { if (mInitalized) exit(); };
 
 			// member variables
 			bool mInitalized;

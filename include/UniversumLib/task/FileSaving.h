@@ -32,17 +32,19 @@
 #ifndef __DR_UNIVERSUM_LIB_CONTROLLER_FILE_SAVING_TASK_H__
 #define __DR_UNIVERSUM_LIB_CONTROLLER_FILE_SAVING_TASK_H__
 
-#include "CPUTask.h"
+#include "UniversumLib/export.h"
+
+#include "DRCore2/Threading/DRCPUTask.h"
+#include "DRCore2/Foundation/DRVirtualFile.h"
 
 namespace UniLib {
-	namespace controller {
-
+	namespace task {
 		class CPUSheduler;
-		class UNIVERSUM_LIB_API FileSavingTask : public CPUTask
+		class UNIVERSUMLIB_EXPORT FileSaving : public DRCPUTask
 		{
 		public:
-			FileSavingTask(const char* fileName, DRVirtualFile* data, bool freeMemory = true);
-			virtual ~FileSavingTask();
+			FileSaving(const char* fileName, DRVirtualFile* data, bool freeMemory = true);
+			virtual ~FileSaving();
 
 			virtual const char* getResourceType() const { return "FileSavingTask"; };
 

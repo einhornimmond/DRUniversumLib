@@ -29,6 +29,7 @@
 #include "DRCore2/DRTypes.h"
 
 #include "magic_enum/magic_enum.hpp"
+using namespace magic_enum::bitwise_operators;
 
 /*!
  *
@@ -45,17 +46,17 @@ namespace UniLib {
 		class UNIVERSUMLIB_EXPORT Node
 		{
 		public:
-			Node(Node* parent = NULL): mType(magic_enum::enum_integer(NodeType::NODE)), mParent(parent) {}
+			Node(Node* parent = NULL): mType(NodeType::NODE), mParent(parent) {}
 			virtual ~Node() {};
 
 			inline Node* getParent() {return mParent;}
 			inline const Node* getParent() const { return mParent;}
 			// update node and child s
 			virtual DRReturn move(float timeSinceLastFrame) = 0;
-			inline HASH getType() const {return mType;}
-			inline bool isTypeOf(NodeType type) const { auto t = magic_enum::enum_integer(type); return (mType & t) == t; }
+			inline NodeType getType() const {return mType;}
+			inline bool isTypeOf(NodeType type) const { return magic_enum::enum_integer(mType & type); }
 		protected:
-			int  mType;
+			NodeType mType;
 			Node* mParent;
 		};
 

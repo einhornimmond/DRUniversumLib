@@ -19,67 +19,59 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.   *
  *                                                                         *
  ***************************************************************************/
-#ifndef __UNIVERSUM_LIB_LIB_COMMAND_EVENT_MANAGER_H__
-#define __UNIVERSUM_LIB_LIB_COMMAND_EVENT_MANAGER_H__
+#ifndef __UNIVERSUM_LIB_MANAGER_COMMAND_EVENT_MANAGER_H__
+#define __UNIVERSUM_LIB_MANAGER_COMMAND_EVENT_MANAGER_H__
 
-//#include "UniversumLib.h"
-#include "controller/Command.h"
+#include "UniversumLib/export.h"
+
+#include "DRCore2/Threading/DRTask.h"
+#include "DRCore2/Threading/DRMultithreadContainer.h"
+
+#include <list>
+#include <map>
 
 namespace UniLib {
-	namespace controller {
-		class Command;
-	}
-	namespace lib {
-
-		
-
-		class UNIVERSUM_LIB_API CommandEventManager
+	namespace manager {
+		class UNIVERSUMLIB_EXPORT CommandEvents: protected DRMultithreadContainer
 		{
 		public:
-			CommandEventManager();
-			~CommandEventManager();
+			CommandEvents();
+			~CommandEvents();
 
 			DRReturn init();
 			void exit();
 
-			DRReturn addCommandForEvent(const char* eventName, controller::Command* command);
-			DRReturn addCommandForEvent(HASH eventHash, controller::Command* command);
-			void removeCommandForEvent(const char* eventName, controller::Command* command);
-			void removeCommandForEvent(HASH eventHash, controller::Command* command);
+			DRReturn addCommandForEvent(const char* eventName, std::shared_ptr<DRCommand> command);
+			DRReturn addCommandForEvent(HASH eventHash, std::shared_ptr<DRCommand> command);
+			void removeCommandForEvent(const char* eventName, std::shared_ptr<DRCommand> command);
+			void removeCommandForEvent(HASH eventHash, std::shared_ptr<DRCommand> command);
 
-			DRReturn triggerEvent(const char* name, controller::Task* task);
-			DRReturn triggerEvent(HASH eventHash, controller::Task* task);
+			void triggerEvent(const char* name, DRTask* task);
+			void triggerEvent(HASH eventHash, DRTask* task);
 
 		protected:
-			typedef std::list<controller::Command*> CommandList;
+			typedef std::list<std::shared_ptr<DRCommand>> CommandList;
 			std::map<HASH, CommandList> mCommandsMap;
-			typedef std::pair<HASH, CommandList> CommandMapPair;
-			typedef std::map<HASH, CommandList>::iterator CommandMapIterator;
-#ifdef _DEBUG
+#ifdef DEBUG
 			// dubletten check
 			typedef std::map<HASH, std::string> HashNameMap;
-			typedef HashNameMap::iterator HashNameMapIterator;
-			typedef std::pair<HASH, std::string> HashNameMapPair;
-			HashNameMap mHashNameMap;
-			
+			HashNameMap mHashNameMap;			
 #endif
-			// mutex
-			SDL_mutex* mWorkingMutex;
 		};
 
-		class UNIVERSUM_LIB_API CallEventManagerCommand : public controller::Command
+		class UNIVERSUMLIB_EXPORT CallEventManagerCommand : public DRCommand
 		{
 		public:
-			CallEventManagerCommand(const char* eventName, controller::Task* task, CommandEventManager* eventManager)
+			CallEventManagerCommand(const char* eventName, DRTask* task, CommandEvents* eventManager)
 				: mEventName(eventName), mFinishedTask(task), mEventManagerToCall(eventManager) {assert(eventManager != NULL);}
-			virtual DRReturn taskFinished(controller::Task* task) {return mEventManagerToCall->triggerEvent(mEventName.data(), mFinishedTask);}
+			virtual void taskFinished(DRTask* task) {mEventManagerToCall->triggerEvent(mEventName.data(), mFinishedTask);}
 		protected:
 			std::string mEventName;
-			controller::Task* mFinishedTask;
-			CommandEventManager* mEventManagerToCall;
+			DRTask* mFinishedTask;
+			CommandEvents* mEventManagerToCall;
 		};
 	}
 }
 
 
-#endif
+#endif __UNIVERSUM_LIB_MANAGER_COMMAND_EVENT_MANAGER_H__

@@ -1,4 +1,8 @@
 #include "UniversumLib/model/geometrie/Plane.h"
+#include "UniversumLib/type/GeometrieRenderMode.h"
+
+#include "magic_enum/magic_enum_flags.hpp"
+using namespace magic_enum::bitwise_operators;
 
 namespace UniLib {
 	namespace model {
@@ -18,18 +22,18 @@ namespace UniLib {
 			{
 				DRVector2 baseEdges[] = {DRVector2(0.0f), DRVector2(0.0f, 1.0f), DRVector2(1.0f, 0.0f), DRVector2(1.0f, 1.0f)};
 				for(int i = 0; i < 4; i++) {
-					if(type & GEOMETRIE_VERTICES) {
-						addVector(DRVector3(baseEdges[i].x, 0.0f, baseEdges[i].y), GEOMETRIE_VERTICES);
+					if(magic_enum::enum_integer(type & GeometrieDataType::VERTICES)) {
+						addVector(DRVector3(baseEdges[i].x, 0.0f, baseEdges[i].y), GeometrieDataType::VERTICES);
 					}
-					if(type & GEOMETRIE_NORMALS) {
-						addVector(DRVector3(0.0f, 1.0f, 0.0f), GEOMETRIE_NORMALS);
+					if(magic_enum::enum_integer(type & GeometrieDataType::NORMALS)) {
+						addVector(DRVector3(0.0f, 1.0f, 0.0f), GeometrieDataType::NORMALS);
 					}
-					if(type & GEOMETRIE_TEX2D_1) {
-						addVector(baseEdges[i], GEOMETRIE_TEX2D_1);
+					if(magic_enum::enum_integer(type & GeometrieDataType::TEX2D_1)) {
+						addVector(baseEdges[i], GeometrieDataType::TEX2D_1);
 					}
 					addIndice(i);
 				}
-				setRenderMode(GEOMETRIE_RENDER_TRIANGLE_STRIP);
+				setRenderMode(GeometrieRenderMode::TRIANGLE_STRIP);
 				copyToFastAccess();
 			}
 		}

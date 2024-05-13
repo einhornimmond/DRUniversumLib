@@ -16,24 +16,24 @@ namespace UniLib {
 		// BLock Material Manager
 		// ************************************************************************************************++
 
-		BlockTypeManager::BlockTypeManager() 
+		BlockTypes::BlockTypes() 
 			: lib::Loadable(LoadingStateType::EMPTY)
 		{
 
 		}
 
-		BlockTypeManager::~BlockTypeManager()
+		BlockTypes::~BlockTypes()
 		{
 			exit();
 		}
 
-		BlockTypeManager* BlockTypeManager::getInstance()
+		BlockTypes* BlockTypes::getInstance()
 		{
-			static BlockTypeManager theOne;
+			static BlockTypes theOne;
 			return &theOne;
 		}
 		// called from io Thread or directly
-		DRReturn BlockTypeManager::init(std::vector<std::string> materialConfigFiles)
+		DRReturn BlockTypes::init(std::vector<std::string> materialConfigFiles)
 		{
 			mMaterialConfigFileNames = std::move(materialConfigFiles);
 			setLoadingState(LoadingStateType::HAS_INFORMATIONS);
@@ -41,7 +41,7 @@ namespace UniLib {
 			return DR_OK;
 		}
 	
-		model::block::BlockType* BlockTypeManager::getBlockType(HASH id)
+		model::block::BlockType* BlockTypes::getBlockType(HASH id)
 		{
 			UNIQUE_LOCK;
 			auto it = mBlockTypes.find(id);
@@ -51,7 +51,7 @@ namespace UniLib {
 			return nullptr;
 		}
 
-		DRReturn BlockTypeManager::load(LoadingStateType target)
+		DRReturn BlockTypes::load(LoadingStateType target)
 		{
 			UNIQUE_LOCK;
 			auto state = detectLoadingState();
@@ -80,7 +80,7 @@ namespace UniLib {
 			}
 		}
 
-		LoadingStateType BlockTypeManager::detectLoadingState()
+		LoadingStateType BlockTypes::detectLoadingState()
 		{
 			UNIQUE_LOCK;
 			if (mBlockTypes.size()) {
@@ -93,7 +93,7 @@ namespace UniLib {
 			return LoadingStateType::EMPTY;
 		}
 
-		void BlockTypeManager::exit()
+		void BlockTypes::exit()
 		{
 			UNIQUE_LOCK;
 			for(auto it = mBlockTypes.begin(); it != mBlockTypes.end(); it++) {
@@ -102,7 +102,7 @@ namespace UniLib {
 			mBlockTypes.clear();
 		}
 
-		DRReturn BlockTypeManager::parsingJsonToBlockTypes(const std::string& fileContent)
+		DRReturn BlockTypes::parsingJsonToBlockTypes(const std::string& fileContent)
 		{
 			DRProfiler profiler;
 			auto json = lib::parseJsonFromString(fileContent);

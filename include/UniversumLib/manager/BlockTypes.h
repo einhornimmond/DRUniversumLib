@@ -42,10 +42,10 @@
 namespace UniLib {
 	namespace manager {		
 		
-		class UNIVERSUMLIB_EXPORT BlockTypeManager : public lib::Loadable, protected DRMultithreadContainer
+		class UNIVERSUMLIB_EXPORT BlockTypes : public lib::Loadable, protected DRMultithreadContainer
 		{
 		public:
-			static BlockTypeManager* getInstance();
+			static BlockTypes* getInstance();
 			//!
 			//! \param materialConfigFiles move vector
 			DRReturn init(std::vector<std::string> materialConfigFiles);
@@ -65,8 +65,8 @@ namespace UniLib {
 			virtual LoadingStateType detectLoadingState();
 			// -----------------------------------------
 
-			BlockTypeManager();
-			virtual ~BlockTypeManager();
+			BlockTypes();
+			virtual ~BlockTypes();
 
 			DRReturn parsingJsonToBlockTypes(const std::string& fileContent);
 

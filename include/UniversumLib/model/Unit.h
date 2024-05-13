@@ -23,100 +23,86 @@
 #ifndef __DR_UNIVERSUM_LIB_UNIT_H__ 
 #define __DR_UNIVERSUM_LIB_UNIT_H__
 
-#include "UniversumLib.h"
+#include "UniversumLib/export.h"
+#include "UniversumLib/type/UnitType.h"
+
+#include "DRCore2/DRTypes.h"
+
+#include <math.h>
 
 namespace UniLib {
-	
-enum UnitTypes
-{
-    NONE = 0,
-    LENGTH = 1, // meter - length
-	AREA = 2, // qm - A
-	VOLUME = 3, // m³ - Volume
-    WEIGHT = 4, // g
-    TEMPERATURE = 5, // temperature in °C
-	TIME = 6, // time in seconds 
-	VELOCITY = 7, //speed m/s
-	ACCELERATION = 8, // m/s²
+    namespace model {
+        class UNIVERSUMLIB_EXPORT Unit
+        {
+        public:
+            Unit(const Unit& copyThis);
+            Unit(double value = 0.0f, UnitType type = UnitType::NONE);
+            ~Unit();
 
-};
+            // calculating
+            //! \return true if both have the same type
+            bool compareType(Unit& b) const { if (this->mType == b.mType) return true; return false; }
 
-class UNIVERSUM_LIB_API Unit 
-{
-public:
-	Unit(const Unit& copyThis);
-	Unit(double value = 0.0f, UnitTypes type = NONE);
-	~Unit();
+            /*    // for calculating
+                Unit operator + (const Unit& b) const;
+                inline Unit operator += (const Unit& b) {*this = *this + b; return *this;}
 
-	// calculating
-	//! \return true if both have the same type
-    bool compareType(Unit& b) const {if(this->mType == b.mType) return true; return false;}
-    
-/*    // for calculating
-    Unit operator + (const Unit& b) const;
-    inline Unit operator += (const Unit& b) {*this = *this + b; return *this;}
-    
-    Unit operator -(const Unit& b) const;
-    inline Unit operator -() const {return Unit(-this->mValue, this->mUnitType);}
-    inline Unit operator -= (const Unit& b) {*this = *this - b; return *this;}
-    
-    Unit operator * (const Unit& b) const;
-    inline Unit operator *= (const Unit& b) {*this = *this * b; return *this;}
-    
-    inline Unit operator *  (const double b) const {return Unit(this->mValue*b, this->mUnitType);}
-    inline Unit operator *= (const double b) {*this = Unit(this->mValue*b, this->mUnitType); return *this;}
-        
-    double operator /(const Unit& b) const;
-    //inline double operator /= (const Unit& b) {*this = *this / b; return *this;}
-    
-    inline Unit operator / (const double b) const {return Unit(this->mValue/b, this->mUnitType);}
-    inline Unit operator /= (const double b) {*this = Unit(this->mValue/b, this->mUnitType); return *this;}
-    
-    inline bool operator == (const Unit& b) const {if(this->mUnitType == b.mUnitType && this->mValue == b.mValue) return true; return false;}
-    inline bool operator != (const Unit& b) const {if(this->mUnitType == b.mUnitType && this->mValue == b.mValue) return false; return true;}
-    
-    bool operator < (const Unit& b) const;
-    bool operator <= (const Unit& b) const;
-  */  
-    //inline operator double() const {return this->mValue;}
-    
-    static const char* getUnitTypeName(UnitTypes unitType);
-    inline UnitTypes getType() const {return mType;}
-    
-    operator double() const;
-private:
+                Unit operator -(const Unit& b) const;
+                inline Unit operator -() const {return Unit(-this->mValue, this->mUnitType);}
+                inline Unit operator -= (const Unit& b) {*this = *this - b; return *this;}
 
-	class UnitPart
-	{
-	public:
-		UnitPart(float value = 0.0f, char modifier = 1);
-		~UnitPart();
+                Unit operator * (const Unit& b) const;
+                inline Unit operator *= (const Unit& b) {*this = *this * b; return *this;}
 
-		// return kilo, mega, giga and other endings
-		const char* getModifierName();
-		inline operator double() const {return pow(mValue, mModifier);};
-	private:
-		float mValue; // value
-		char mModifier; // 10^modifier
-	};
-	UnitPart* mUnitParts;
-	u8		  mUnitPartsCount;
-	UnitTypes mType;
+                inline Unit operator *  (const double b) const {return Unit(this->mValue*b, this->mUnitType);}
+                inline Unit operator *= (const double b) {*this = Unit(this->mValue*b, this->mUnitType); return *this;}
 
-	// ----------------------------------------------------------------------
-	/*
-     * \param value input value to cut
-	 * \param returnUnitPartCount referenz to write unitPartCount
-	 * \return pointer (to release with delete []) to UnitPart Array
-	*/
-	UnitPart* collectNegativeUnitParts(double value, u8 &returnUnitPartCount);
-	UnitPart* collectPositiveUnitParts(double value, u8 &returnUnitPartCount);
-	u8 countMaxUnitPartsCount(double value);
-	
-};
+                double operator /(const Unit& b) const;
+                //inline double operator /= (const Unit& b) {*this = *this / b; return *this;}
 
-};
+                inline Unit operator / (const double b) const {return Unit(this->mValue/b, this->mUnitType);}
+                inline Unit operator /= (const double b) {*this = Unit(this->mValue/b, this->mUnitType); return *this;}
 
+                inline bool operator == (const Unit& b) const {if(this->mUnitType == b.mUnitType && this->mValue == b.mValue) return true; return false;}
+                inline bool operator != (const Unit& b) const {if(this->mUnitType == b.mUnitType && this->mValue == b.mValue) return false; return true;}
 
+                bool operator < (const Unit& b) const;
+                bool operator <= (const Unit& b) const;
+              */
+              //inline operator double() const {return this->mValue;}
+            inline UnitType getType() const { return mType; }
+
+            operator double() const;
+        private:
+
+            class UnitPart
+            {
+            public:
+                UnitPart(float value = 0.0f, char modifier = 1);
+                ~UnitPart();
+
+                // return kilo, mega, giga and other endings
+                const char* getModifierName();
+                inline operator double() const { return pow(mValue, mModifier); };
+            private:
+                float mValue; // value
+                char mModifier; // 10^modifier
+            };
+            UnitPart* mUnitParts;
+            u8		  mUnitPartsCount;
+            UnitType mType;
+
+            // ----------------------------------------------------------------------
+            /*
+             * \param value input value to cut
+             * \param returnUnitPartCount referenz to write unitPartCount
+             * \return pointer (to release with delete []) to UnitPart Array
+            */
+            UnitPart* collectNegativeUnitParts(double value, u8& returnUnitPartCount);
+            UnitPart* collectPositiveUnitParts(double value, u8& returnUnitPartCount);
+            u8 countMaxUnitPartsCount(double value);
+        };
+    }
+}
 
 #endif //__DR_UNIVERSUM_LIB_UNIT_H__

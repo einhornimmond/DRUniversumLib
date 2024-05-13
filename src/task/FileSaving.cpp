@@ -1,24 +1,26 @@
-#include "controller/FileSavingTask.h"
+#include "UniversumLib/task/FileSaving.h"
+#include "UniversumLib/UniversumLib.h"
+
+#include "DRCore2/DRCore2Main.h"
 
 namespace UniLib {
-	namespace controller {
-
-		FileSavingTask::FileSavingTask(const char* fileName, DRVirtualFile* data, bool freeMemory /* = true */)
-			: CPUTask(g_HarddiskScheduler), mFileName(fileName), mData(data), mFreeMemory(freeMemory)
+	namespace task {
+		FileSaving::FileSaving(const char* fileName, DRVirtualFile* data, bool freeMemory /* = true */)
+			: DRCPUTask(g_StorageScheduler), mFileName(fileName), mData(data), mFreeMemory(freeMemory)
 		{
-#ifdef _UNI_LIB_DEBUG
+#ifdef DEBUG
 			setName(fileName);
 #endif
 		}
 
-		FileSavingTask::~FileSavingTask() 
+		FileSaving::~FileSaving()
 		{
 			if (mFreeMemory) {
 				DR_SAVE_DELETE(mData);
 			}
 		}
 
-		DRReturn FileSavingTask::run() 
+		DRReturn FileSaving::run()
 		{
 			if (mData->saveToFile(mFileName.data())) {
 				LOG_ERROR("error saving data to file", DR_ERROR);

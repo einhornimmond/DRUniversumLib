@@ -2,8 +2,6 @@
 #include "UniversumLib/model/SectorID.h"
 #include "UniversumLib/type/NodeType.h"
 
-#include "magic_enum/magic_enum.hpp"
-
 namespace UniLib {
 	namespace controller {
 
@@ -11,7 +9,7 @@ namespace UniLib {
 		OctreeNode::OctreeNode(model::SectorID* id, model::Node* parent /* = NULL */)
 			: Sector(parent, id)
 		{
-			mType |= magic_enum::enum_integer(NodeType::OCTREE);
+			mType |= NodeType::OCTREE;
 			memset(mChilds, 0, sizeof(model::Node*) * 8);
 		}
 

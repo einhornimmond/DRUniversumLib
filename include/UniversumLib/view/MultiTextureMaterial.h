@@ -33,15 +33,12 @@
 #define __UNIVERSUM_LIB_VIEW_MULTI_TEXTURE_MATERIAL_H
 
 #include "Material.h"
+#include "UniversumLib/view/Texture.h"
 
 namespace UniLib {
-
 	namespace view {
 
-		class Texture;
-		typedef DRResourcePtr<Texture> TexturePtr;
-
-		class UNIVERSUM_LIB_API MultiTextureMaterial : public Material
+		class UNIVERSUMLIB_EXPORT MultiTextureMaterial : public Material
 		{
 		public:
 			MultiTextureMaterial(size_t textureCount);

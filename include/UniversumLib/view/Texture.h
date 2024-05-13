@@ -74,7 +74,7 @@ namespace UniLib {
 
 			DHASH mId;
 		};
-		
+		typedef std::shared_ptr<Texture> TexturePtr;
 	}
 }
 

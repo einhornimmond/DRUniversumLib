@@ -32,12 +32,15 @@
 #ifndef __DR_UNIVERSUM_LIB_CONTROLLER_FILE_LOADING_TASK_H__
 #define __DR_UNIVERSUM_LIB_CONTROLLER_FILE_LOADING_TASK_H__
 
-#include "CPUTask.h"
+#include "UniversumLib/export.h"
+
+#include "DRCore2/Foundation/DRVirtualFile.h"
+#include "DRCore2/Threading/DRCPUTask.h"
 
 namespace UniLib {
-	namespace controller {
+	namespace task {
 
-		class UNIVERSUM_LIB_API FileLoadingReciver
+		class UNIVERSUMLIB_EXPORT FileLoadingReciver
 		{
 		public:
 			// if returns true, FileLoadingTask delete data buffer
@@ -47,15 +50,15 @@ namespace UniLib {
 			virtual void finishFileLoadingTask() = 0;
 		};
 
-		class CPUSheduler;
-		class UNIVERSUM_LIB_API FileLoadingTask : public CPUTask
+		class DECPUSheduler;
+		class UNIVERSUMLIB_EXPORT FileLoading : public DRCPUTask
 		{
 		public:
-			FileLoadingTask(FileLoadingReciver* reciver, const char* fileName);
-			FileLoadingTask(FileLoadingReciver* reciver, std::vector<std::string> fileNames);
-			virtual ~FileLoadingTask();
+			FileLoading(FileLoadingReciver* reciver, const char* fileName);
+			FileLoading(FileLoadingReciver* reciver, std::vector<std::string> fileNames);
+			virtual ~FileLoading();
 
-			virtual const char* getResourceType() const { return "FileLoadingTask"; };
+			virtual const char* getResourceType() const { return "FileLoading"; };
 			//! \brief return true if task has finished, else false
 			//! automatic scheduling of task if he isn't finished and sheduled yet
 			virtual bool isTaskFinished();

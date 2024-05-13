@@ -26,6 +26,8 @@
 #include "UniversumLib/export.h"
 #include "UniversumLib/type/LoadingStateType.h"
 
+#include "DRCore2/Foundation/DRIResource.h"
+
 #include <memory>
 
 namespace UniLib {
@@ -62,7 +64,6 @@ namespace UniLib {
 			virtual LoadingStateType checkLoadingState();
 
 		protected:
-
 			model::ShaderProgramPtr mShaderProgram;
 			model::UniformSet* mUniformsSet;
 		};

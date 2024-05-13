@@ -7,6 +7,9 @@
 #include "UniversumLib/controller/BindToRenderer.h"
 #include "UniversumLib/model/UniformSet.h"
 #include "UniversumLib/model/ShaderProgram.h"
+#include "UniversumLib/type/BaseGeometrieType.h"
+
+#include "DRCore2/DRCore2Main.h"
 
 namespace UniLib {
 	namespace generator {
@@ -27,19 +30,21 @@ namespace UniLib {
 
 		bool RenderToTexture::isReady()
 		{
-			view::Geometrie* geo = nullptr;
+			view::GeometriePtr geo;
 			if (mGeometrie) {
-				geo = mGeometrie.get();
+				geo = mGeometrie;
 			}
 			if (!geo) {
-				geo = manager::BaseGeometries::getInstance()->getGeometrie(controller::BASE_GEOMETRIE_PLANE);
+				geo = manager::BaseGeometries::getInstance()->getGeometrie(BaseGeometrieType::PLANE);
 			}
-#ifdef _UNI_LIB_DEBUG
-			bool geoReady = geo->isReady();
-			bool textureReady = mTexture->checkLoadingState() == LOADING_STATE_FULLY_LOADED;
-			bool materialReady = mMaterial->checkLoadingState() == LOADING_STATE_FULLY_LOADED;
-#endif //_UNI_LIB_DEBUG
-			return geo->isReady() && mTexture->checkLoadingState() == LOADING_STATE_FULLY_LOADED && mMaterial->checkLoadingState() == LOADING_STATE_FULLY_LOADED;
+#ifdef DEBUG
+			bool textureReady = mTexture->checkLoadingState() == LoadingStateType::FULLY_LOADED;
+			bool materialReady = mMaterial->checkLoadingState() == LoadingStateType::FULLY_LOADED;
+#endif //DEBUG
+			return 
+				mTexture->checkLoadingState() == LoadingStateType::FULLY_LOADED
+				&& mMaterial->checkLoadingState() == LoadingStateType::FULLY_LOADED
+			;
 		}
 
 		void RenderToTexture::setMaterial(view::MaterialPtr mat)
@@ -53,9 +58,7 @@ namespace UniLib {
 
 			DRMatrix projection = DRMatrix::ortho_projection(0.0f, 1.0f, 0.0f, 1.0f, -1.0, 1.0);
 			uniforms->setUniform("proj", projection);
-			model::ShaderProgram* shader = mMaterial->getShaderProgram();
-			uniforms->addLocationToUniform("proj", shader);
-			
+			uniforms->addLocationToUniform("proj", mMaterial->getShaderProgram());			
 		}
 
 		DRReturn RenderToTexture::run()
@@ -70,12 +73,12 @@ namespace UniLib {
 		}
 		DRReturn RenderToTexture::render()
 		{
-			view::Geometrie* geo = nullptr;
-			if (mGeometrie.getResourcePtrHolder()) {
+			view::GeometriePtr geo = nullptr;
+			if (mGeometrie) {
 				geo = mGeometrie;
 			}
 			if (!geo) {
-				geo = controller::BaseGeometrieManager::getInstance()->getGeometrie(controller::BASE_GEOMETRIE_PLANE);
+				geo = manager::BaseGeometries::getInstance()->getGeometrie(BaseGeometrieType::PLANE);
 			}
 			return geo->render();
 		}

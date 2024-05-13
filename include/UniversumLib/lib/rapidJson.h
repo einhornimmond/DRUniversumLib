@@ -10,14 +10,14 @@
 
 namespace UniLib {
 	namespace lib {
-		UNIVERSUMLIB_EXPORT extern rapidjson::Document parseJsonFromString(const std::string& jsonString);
+		UNIVERSUMLIB_EXPORT rapidjson::Document parseJsonFromString(const std::string& jsonString);
 
 		//! check if member with type exist on obj, else throw exception
 		//! \param obj rapidjson value or document
 		//! \param memberName member which will be checked
 		//! \param memberType type member must have
 		//! \param objectName (optional) for exception message if is member is missing
-		UNIVERSUMLIB_EXPORT extern void jsonMemberRequired(
+		UNIVERSUMLIB_EXPORT void jsonMemberRequired(
 			const rapidjson::Value& obj, const char* memberName, JsonMemberType memberType, const char* objectName = nullptr
 		);
 	}

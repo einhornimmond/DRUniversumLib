@@ -14,7 +14,7 @@ namespace UniLib {
 		BlockSectorTree::BlockSectorTree(model::SectorID* id, model::Node* parent)
 			: OctreeNode(id, parent)
 		{
-			mType |= magic_enum::enum_integer(NodeType::BLOCK_SECTOR_TREE);
+			mType |= NodeType::BLOCK_SECTOR_TREE;
 		}
 
 		BlockSectorTree::~BlockSectorTree()
@@ -52,7 +52,7 @@ namespace UniLib {
 				}
 			}
 			// the leaf is not yet reached
-			else if (node->isTypeOf(magic_enum::enum_cast<NodeType>(mType).value()) ) {
+			else if (node->isTypeOf(mType) ) {
 				BlockSectorTree* n = static_cast<BlockSectorTree*>(node);
 				if (!path.empty()) {
 					return n->addBlock(block, path, pos);

@@ -49,11 +49,5 @@ namespace UniLib {
 			task->scheduleTask(task);
 			mRunningLoadingTask = task;
 		}
-
-		void Loadable::updateLoadingState()
-		{
-			auto state = detectLoadingState();
-			mLoadingState = state;
-		}
 	}
 }

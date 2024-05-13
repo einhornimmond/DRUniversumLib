@@ -1,6 +1,9 @@
 
-#include "model/geometrie/Rect2DCollection.h"
+#include "UniversumLib/model/geometrie/Rect2DCollection.h"
+#include "UniversumLib/type/GeometrieRenderMode.h"
+#include "UniversumLib/type/GeometrieDataType.h"
 
+#include "DRCore2/DRCore2Main.h"
 
 namespace UniLib {
 	namespace model {
@@ -27,7 +30,7 @@ namespace UniLib {
 					DR_SAVE_DELETE_ARRAY(outputs);
 					LOG_ERROR("no valid order found", DR_ERROR);
 				}
-				setRenderMode(GEOMETRIE_RENDER_TRIANGLES);
+				setRenderMode(GeometrieRenderMode::TRIANGLES);
 
 				mVertexSize = 3;
 				mVertexCount = 4 * rectCount;
@@ -64,7 +67,7 @@ namespace UniLib {
 					mIndicesArray[i * 6 + 5] = 3;
 				}
 
-				mVertexFormatFlags = GEOMETRIE_VERTICES;
+				mVertexFormatFlags = GeometrieDataType::VERTICES;
 				DR_SAVE_DELETE_ARRAY(outputs);
 
 				return DR_OK;

@@ -1,29 +1,30 @@
-#include "controller/FileLoadingTask.h"
+#include "UniversumLib/task/FileLoading.h"
+#include "UniversumLib/UniversumLib.h"
 
 namespace UniLib {
-	namespace controller {
-		FileLoadingTask::FileLoadingTask(FileLoadingReciver* reciver, const char* fileName)
-			: CPUTask(g_HarddiskScheduler), mFinishReciver(reciver), mFinished(false)
+	namespace task {
+		FileLoading::FileLoading(FileLoadingReciver* reciver, const char* fileName)
+			: DRCPUTask(g_StorageScheduler), mFinishReciver(reciver), mFinished(false)
 		{
 			assert(reciver != NULL);
 			mFileNames.push_back(fileName);
 			mFilesInMemory = new DRVirtualFile*;
-#ifdef _UNI_LIB_DEBUG
+#ifdef DEBUG
 			setName(fileName);
 #endif
 		}
 
-		FileLoadingTask::FileLoadingTask(FileLoadingReciver* reciver, std::vector<std::string> fileNames)
-			: CPUTask(g_HarddiskScheduler), mFinishReciver(reciver), mFileNames(fileNames), mFinished(false)
+		FileLoading::FileLoading(FileLoadingReciver* reciver, std::vector<std::string> fileNames)
+			: DRCPUTask(g_StorageScheduler), mFinishReciver(reciver), mFileNames(fileNames), mFinished(false)
 		{
-#ifdef _UNI_LIB_DEBUG
+#ifdef DEBUG
 			setName(fileNames[0].data());
 #endif
 			assert(reciver != NULL);
 			mFilesInMemory = new DRVirtualFile*[mFileNames.size()];
 			memset(mFilesInMemory, 0, sizeof(DRVirtualFile*)*mFileNames.size());
 		}
-		FileLoadingTask::~FileLoadingTask()
+		FileLoading::~FileLoading()
 		{
 			if (mFileNames.size() > 1) {
 				DR_SAVE_DELETE_ARRAY(mFilesInMemory);
@@ -34,7 +35,7 @@ namespace UniLib {
 			mFileNames.clear();
 		}
 
-		DRReturn FileLoadingTask::run()
+		DRReturn FileLoading::run()
 		{
 			for (u16 i = 0; i < mFileNames.size(); i++) {
 				DRFile file(mFileNames[i].data(), "rb");
@@ -71,21 +72,19 @@ namespace UniLib {
 					mFilesInMemory[i] = NULL;
 				}
 			}
-			lock();
-			mFinished = true;
-			unlock();
+			{
+				auto lock = getUniqueLock();
+				mFinished = true;
+			}
 			mFinishReciver->finishFileLoadingTask();
 			
 			return DR_OK;
 		}
 
-		bool FileLoadingTask::isTaskFinished()
+		bool FileLoading::isTaskFinished()
 		{
-			bool state = false;
-			lock();
-			state = mFinished;
-			unlock();
-			return state;
+			auto lock = getUniqueLock();
+			return mFinished;
 		}
 	}
 
